@@ -1,3 +1,6 @@
+import Image from "next/image";
+import Avatar from "../../../../public/images/avatar.png";
+
 export default function Mesurments() {
   const mesurments = [
     { key: "Height", value: 168, unit: "CM" },
@@ -16,8 +19,10 @@ export default function Mesurments() {
           measurements if needed.
         </div>
       </div>
-      <div className="flex mt-[2.3rem]">
-        <div className="w-[50%]"></div>
+      <div className="flex mt-[2.3rem] justify-between">
+        <div className="">
+          <Image alt="Avatar" height={100} width={150} src={Avatar} />
+        </div>
         <div className="">
           <div className="flex flex-col gap-[0.5rem]">
             {mesurments.map((measurement, index) => (
