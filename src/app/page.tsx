@@ -22,7 +22,6 @@ export default function Home() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-[#4B3F91] via-[#3D5AAB] to-[#2B4C77]">
-      {/* Logo */}
       <div
         className={`absolute transition-all duration-1000 ease-in-out
           ${
@@ -38,7 +37,6 @@ export default function Home() {
         STYLLAR
       </div>
 
-      {/* Tagline */}
       {!isLoaded && (
         <div
           className="absolute left-1/2 -translate-x-1/2 flex gap-[1px] 
@@ -63,7 +61,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Main content */}
       {isLoaded && (
         <div className="max-width-wrapper text-white mt-24">
           <div className="flex flex-col gap-[1.5rem]">
