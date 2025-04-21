@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Instructions from "./stepper_pages/camera_instructions";
 import UserDetsFormContent from "./stepper_pages/userdets_form";
 import { BackwardArrow, ForwardArrow } from "./svg";
+import Mesurments from "./stepper_pages/mesurments";
 
 export default function Stepper() {
   const [step, setStep] = useState(1);
@@ -14,13 +15,17 @@ export default function Stepper() {
         return <UserDetsFormContent key="step1" />;
       case 2:
         return <Instructions key="step2" />;
+      case 3:
+        return <Mesurments key="step3" />;
+      case 4:
+        return <Mesurments key="step4" />;
       default:
         return null;
     }
   };
 
-  const handleNext = () => setStep((prev) => Math.min(prev + 1, 2));
-  const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
+  const handleNext = () => setStep((prev) => prev + 1);
+  const handlePrev = () => setStep((prev) => prev - 1);
 
   return (
     <div className="relative min-h-[85vh]">
