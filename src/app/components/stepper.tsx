@@ -6,7 +6,7 @@ import UserDetsFormContent from "./stepper_pages/userdets_form";
 import { BackwardArrow, ForwardArrow } from "./svg";
 
 export default function Stepper() {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(2);
 
   const renderStepContent = () => {
     switch (step) {
