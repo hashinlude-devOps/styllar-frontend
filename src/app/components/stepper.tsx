@@ -34,7 +34,11 @@ export default function Stepper() {
         );
       case 3:
         return (
-          <CameraCapture key="step3" onCapture={() => setIsNextEnabled(true)} />
+          <CameraCapture
+            key="step3"
+            onProceedToMeasurements={handleNext}
+            onGoBack={handlePrev}
+          />
         );
       case 4:
         return <Mesurments key="step1" />;
@@ -58,7 +62,7 @@ export default function Stepper() {
         </motion.div>
       </AnimatePresence>
 
-      <div className="absolute bottom-20 left-0 right-0 flex justify-center gap-4 px-4">
+      <div className="absolute bottom-20 left-0 right-0 flex justify-center gap-4">
         <button
           onClick={handlePrev}
           disabled={step === 1}
