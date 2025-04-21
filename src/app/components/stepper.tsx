@@ -1,6 +1,8 @@
+"use client";
 import { useState } from "react";
 import Instructions from "./camera_instructions";
 import UserDetsFormContent from "./userdets_form";
+import { BackwardArrow } from "./svg";
 
 export default function Stepper() {
   const [step, setStep] = useState(1);
@@ -28,7 +30,7 @@ export default function Stepper() {
     <div
       style={{
         position: "relative",
-        minHeight: "90vh",
+        minHeight: "85vh",
         // paddingBottom: "7rem",
       }}
     >
@@ -45,10 +47,18 @@ export default function Stepper() {
           gap: "1rem",
         }}
       >
-        <button onClick={handlePrev} disabled={step === 1}>
-          Previous
+        <button
+          onClick={handlePrev}
+          disabled={step === 1}
+          className="rounded-[1rem] py-[1rem] px-[1.5rem] bg-[#2121216b] backdrop-blur-[7.5px] w-full"
+        >
+          <BackwardArrow />
         </button>
-        <button onClick={handleNext} disabled={step === 2}>
+        <button
+          onClick={handleNext}
+          disabled={step === 2}
+          className="rounded-[1rem] py-[1rem] px-[1.5rem] bg-[#2121216b] backdrop-blur-[7.5px] w-full"
+        >
           Next
         </button>
       </div>
