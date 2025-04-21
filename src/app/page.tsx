@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
+import UserDetsFormContent from "./components/userdets_form";
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hideTagline, setHideTagline] = useState(false);
+  const [showBody, setshowBody] = useState(false);
 
   const tagline = "Your Personal AI Stylist";
 
@@ -12,8 +14,14 @@ export default function Home() {
 
     const timeout = setTimeout(() => {
       setHideTagline(true);
+
       setTimeout(() => {
         setIsLoaded(true);
+
+        // 💡 Delay form by 600ms (after logo finishes transition)
+        setTimeout(() => {
+          setshowBody(true);
+        }, 700);
       }, tagline.length * 50 + 500);
     }, splashDuration);
 
@@ -61,28 +69,9 @@ export default function Home() {
         </div>
       )}
 
-      {isLoaded && (
+      {showBody && (
         <div className="max-width-wrapper text-white mt-24">
-          <div className="flex flex-col gap-[1.5rem]">
-            <h1 className="text-white text-[24px] font-semibold leading-[120%] tracking-[-0.03rem]">
-              Hey there! <br /> We’re excited to style you.
-            </h1>
-            <p className="text-white text-[16px] font-normal leading-[140%]">
-              What’s your name so we can make this personal?
-            </p>
-
-            <input
-              type="text"
-              placeholder="Name"
-              className="flex max-w-[30rem] h-[3.5rem] px-5 py-4 flex-col justify-center items-start gap-1 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
-            />
-
-            <input
-              type="email"
-              placeholder="Email"
-              className="flex max-w-[30rem] h-[3.5rem] px-5 py-4 flex-col justify-center items-start gap-1 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
-            />
-          </div>
+          <UserDetsFormContent />
         </div>
       )}
     </div>
