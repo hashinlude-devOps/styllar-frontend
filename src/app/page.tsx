@@ -25,9 +25,11 @@ export default function Home() {
       {/* Logo */}
       <div
         className={`absolute transition-all duration-1000 ease-in-out
-          ${isLoaded
-            ? "top-4 left-1/2 -translate-x-1/2 scale-75"
-            : "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"}
+          ${
+            isLoaded
+              ? "top-4 left-1/2 -translate-x-1/2 scale-75"
+              : "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+          }
           text-white text-center font-montserrat font-medium
           text-[2.2rem] sm:text-[2.5rem] md:text-[3rem]
           tracking-[1.2rem] sm:tracking-[1.5rem] md:tracking-[1.8rem]
@@ -63,8 +65,27 @@ export default function Home() {
 
       {/* Main content */}
       {isLoaded && (
-        <div className="px-6 sm:px-12 lg:px-20 text-white">
-          <h1 className="text-xl sm:text-2xl mt-24">Welcome to STYLLAR</h1>
+        <div className="max-width-wrapper text-white mt-24">
+          <div className="flex flex-col gap-[1.5rem]">
+            <h1 className="text-white text-[24px] font-semibold leading-[120%] tracking-[-0.03rem]">
+              Hey there! <br /> We’re excited to style you.
+            </h1>
+            <p className="text-white text-[16px] font-normal leading-[140%]">
+              What’s your name so we can make this personal?
+            </p>
+
+            <input
+              type="text"
+              placeholder="Name"
+              className="flex max-w-[30rem] h-[3.5rem] px-5 py-4 flex-col justify-center items-start gap-1 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
+            />
+
+            <input
+              type="email"
+              placeholder="Email"
+              className="flex max-w-[30rem] h-[3.5rem] px-5 py-4 flex-col justify-center items-start gap-1 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
+            />
+          </div>
         </div>
       )}
     </div>
