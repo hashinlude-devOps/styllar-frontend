@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import UserDetsFormContent from "./components/userdets_form";
+import Stepper from "./components/stepper";
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -18,7 +18,6 @@ export default function Home() {
       setTimeout(() => {
         setIsLoaded(true);
 
-        // 💡 Delay form by 600ms (after logo finishes transition)
         setTimeout(() => {
           setshowBody(true);
         }, 700);
@@ -71,7 +70,7 @@ export default function Home() {
 
       {showBody && (
         <div className="max-width-wrapper text-white mt-24">
-          <UserDetsFormContent />
+          <Stepper />
         </div>
       )}
     </div>
