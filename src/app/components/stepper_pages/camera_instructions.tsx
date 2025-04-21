@@ -11,14 +11,19 @@ export default function Instructions() {
         from 2 angles. Don’t worry—you can adjust the details afterward if
         needed!
       </div>
-      <div>
       <Image
         src="/bodycountour.svg"
         alt="Side Pose"
-        fill
-        className="rounded-lg  object-contain"
+        width={0}
+        height={0}
+        sizes="100vw"
+        className="w-full h-auto rounded-lg object-contain"
       />
-      </div>
+      <button className="flex w-full px-6 py-4 justify-center items-center gap-2 rounded-[1rem] bg-[rgba(33,33,33,0.42)] backdrop-blur-[20px]">
+        <span className="flex flex-col justify-center items-start rounded-[0.5rem] text-white text-center text-base font-normal leading-6 tracking-normal [font-feature-settings:'ss01'_on,'cv01'_on]">
+          Open Camera
+        </span>
+      </button>
     </div>
   );
 }
