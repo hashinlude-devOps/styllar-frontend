@@ -6,6 +6,9 @@ import GenderSelect from "./select_gende";
 export default function UserDetsFormContent() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [dob, setDob] = useState("");
+  const [weight, setWeight] = useState("");
+  const [height, setHeight] = useState("");
 
   return (
     <div className="flex flex-col gap-[1.5rem]">
@@ -33,6 +36,36 @@ export default function UserDetsFormContent() {
       />
 
       <GenderSelect />
+
+      <input
+        type="date"
+        placeholder="Date of Birth"
+        value={dob}
+        onChange={(e) => setDob(e.target.value)}
+        className="custom-date-input max-w-[30rem] h-[3.5rem] px-5 py-4 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
+      />
+
+      {/* Weight */}
+      <div className="relative max-w-[30rem]">
+        <input
+          type="number"
+          placeholder="Weight (kg)"
+          value={weight}
+          onChange={(e) => setWeight(e.target.value)}
+          className="w-full h-[3.5rem] px-5 py-4 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
+        />
+      </div>
+
+      {/* Height */}
+      <div className="relative max-w-[30rem]">
+        <input
+          type="number"
+          placeholder="Height (cm)"
+          value={height}
+          onChange={(e) => setHeight(e.target.value)}
+          className="w-full h-[3.5rem] px-5 py-4 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
+        />
+      </div>
     </div>
   );
 }

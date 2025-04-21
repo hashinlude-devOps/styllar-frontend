@@ -28,7 +28,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-[#4B3F91] via-[#3D5AAB] to-[#2B4C77]">
+    <div className="relative w-full min-h-screen overflow-hidden bg-gradient-to-br from-[#4B3F91] via-[#3D5AAB] to-[#2B4C77]">
       <div
         className={`absolute transition-all duration-1000 ease-in-out
           ${
@@ -69,7 +69,7 @@ export default function Home() {
       )}
 
       {showBody && (
-        <div className="max-width-wrapper text-white mt-24">
+        <div className="max-width-wrapper text-white mt-24 mb-10">
           <Stepper />
         </div>
       )}
