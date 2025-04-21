@@ -22,12 +22,13 @@ export default function Home() {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-[#4B3F91] via-[#3D5AAB] to-[#2B4C77]">
-      {/* Logo */}
       <div
         className={`absolute transition-all duration-1000 ease-in-out
-          ${isLoaded
-            ? "top-4 left-1/2 -translate-x-1/2 scale-75"
-            : "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"}
+          ${
+            isLoaded
+              ? "top-4 left-1/2 -translate-x-1/2 scale-75"
+              : "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+          }
           text-white text-center font-montserrat font-medium
           text-[2.2rem] sm:text-[2.5rem] md:text-[3rem]
           tracking-[1.2rem] sm:tracking-[1.5rem] md:tracking-[1.8rem]
@@ -36,7 +37,6 @@ export default function Home() {
         STYLLAR
       </div>
 
-      {/* Tagline */}
       {!isLoaded && (
         <div
           className="absolute left-1/2 -translate-x-1/2 flex gap-[1px] 
@@ -61,7 +61,6 @@ export default function Home() {
         </div>
       )}
 
-      {/* Main content */}
       {isLoaded && (
         <div className="px-6 sm:px-12 lg:px-20 text-white">
           <h1 className="text-xl sm:text-2xl mt-24">Welcome to STYLLAR</h1>
