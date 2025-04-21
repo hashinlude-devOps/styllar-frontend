@@ -12,3 +12,7 @@ body {
   font-family: var(--font-montserrat), sans-serif;
 
 }
+
+.max-width-wrapper {
+  @apply mx-auto max-w-[1224px] px-6 md:px-4;
+}
