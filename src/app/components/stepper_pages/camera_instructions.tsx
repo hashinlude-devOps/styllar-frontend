@@ -1,6 +1,14 @@
 import Image from "next/image";
 
-export default function Instructions() {
+type InstructionsProps = {
+  onEnableNext: () => void;
+  onProceedToCamera: () => void;
+};
+
+export default function Instructions({
+  onEnableNext,
+  onProceedToCamera,
+}: InstructionsProps) {
   return (
     <div className="flex flex-col gap-[0.75rem]">
       <div className="text-[1.5rem] font-semibold">
@@ -19,7 +27,13 @@ export default function Instructions() {
         sizes="100vw"
         className="w-full h-auto rounded-lg object-contain"
       />
-      <button className="flex w-full px-6 py-4 justify-center items-center gap-2 rounded-[1rem] bg-[rgba(33,33,33,0.42)] backdrop-blur-[20px]">
+      <button
+        onClick={() => {
+          onEnableNext(); // Optional if you're using this to enable next manually
+          onProceedToCamera(); // This will go to step 3
+        }}
+        className="flex w-full px-6 py-4 justify-center items-center gap-2 rounded-[1rem] bg-[rgba(33,33,33,0.42)] backdrop-blur-[20px]"
+      >
         <span className="flex flex-col justify-center items-start rounded-[0.5rem] text-white text-center text-base font-normal leading-6 tracking-normal [font-feature-settings:'ss01'_on,'cv01'_on]">
           Open Camera
         </span>
