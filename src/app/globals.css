@@ -1,12 +1,14 @@
 @import "tailwindcss";
 
 :root {
-  --background: linear-gradient(95deg, #8563ED 1.36%, #3AAEF8 112.96%);
+  --background: linear-gradient(180deg, #2E3E61 0%, #6858B3 50%, #212A5B 100%);
   --foreground: #171717;
+  --font-primary: var(--font-montserrat), sans-serif;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-montserrat), sans-serif;
+
 }
