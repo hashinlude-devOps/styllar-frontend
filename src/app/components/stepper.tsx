@@ -34,11 +34,11 @@ export default function Stepper() {
         );
       case 3:
         return (
-          <CameraCapture
-            key="step3"
-            onCapture={() => setIsNextEnabled(true)}
-          />
+          <CameraCapture key="step3" onCapture={() => setIsNextEnabled(true)} />
         );
+      case 4:
+        return <Mesurments key="step1" />;
+
       default:
         return null;
     }
