@@ -1,7 +1,7 @@
 // components/FormContent.tsx
 "use client";
 import { useState } from "react";
-import GenderSelect from "./select_gende";
+import GenderSelect from "../common/select_gender";
 
 export default function UserDetsFormContent() {
   const [name, setName] = useState("");
