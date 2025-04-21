@@ -8,7 +8,7 @@ type CameraCaptureProps = {
 
 export default function CameraCapture({
   onProceedToMeasurements,
-  onGoBack
+  onGoBack,
 }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [capturedFront, setCapturedFront] = useState(false);
@@ -95,6 +95,15 @@ export default function CameraCapture({
     }
   }, [capturedFront, capturedSide, onProceedToMeasurements]);
 
+  const handleGoBack = () => {
+    if (videoRef.current?.srcObject) {
+      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+      tracks.forEach((track) => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    onGoBack(); // ⬅️ go back to previous step/screen
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black flex justify-center items-center overflow-hidden">
       <video
@@ -107,7 +116,7 @@ export default function CameraCapture({
 
       {/* Close Button in Top-Right */}
       <button
-        onClick={onGoBack}
+        onClick={handleGoBack}
         className="absolute top-4 right-4 z-20 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
       >
         <FaTimes className="text-lg" />
