@@ -1,14 +1,11 @@
+import { CameraCaptureProps } from "@/app/types/UserDetails";
 import { useEffect, useRef, useState } from "react";
 import { FaCamera, FaTimes } from "react-icons/fa";
-
-type CameraCaptureProps = {
-  onProceedToMeasurements: () => void;
-  onGoBack: () => void;
-};
 
 export default function CameraCapture({
   onProceedToMeasurements,
   onGoBack,
+  setCapturedImages,
 }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [capturedFront, setCapturedFront] = useState(false);
@@ -57,32 +54,61 @@ export default function CameraCapture({
     canvas.height = videoRef.current.videoHeight;
 
     const ctx = canvas.getContext("2d");
+    // if (ctx) {
+    //   ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+    //   const dataURL = canvas.toDataURL("image/png");
+
+    //   if (currentCapture === "front") {
+    //     setCapturedFront(true);
+    //     setCurrentCapture("side");
+    //     console.log("Front Image Captured:", dataURL);
+    //   } else if (currentCapture === "side") {
+    //     setCapturedSide(true);
+    //     console.log("Side Image Captured:", dataURL);
+
+    //     // 🔥 Stop the camera immediately
+    //     if (videoRef.current?.srcObject) {
+    //       const tracks = (
+    //         videoRef.current.srcObject as MediaStream
+    //       ).getTracks();
+    //       tracks.forEach((track) => track.stop());
+    //       videoRef.current.srcObject = null;
+    //     }
+
+    //     // ⏳ Add a delay (e.g., 1 second) before proceeding
+    //     setTimeout(() => {
+    //       onProceedToMeasurements(); // Replace with your actual redirect function
+    //     }, 1500); // 1000ms = 1 second
+    //   }
+    // }
     if (ctx) {
       ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-      const dataURL = canvas.toDataURL("image/png");
+      canvas.toBlob((blob) => {
+        if (!blob) return;
 
-      if (currentCapture === "front") {
-        setCapturedFront(true);
-        setCurrentCapture("side");
-        console.log("Front Image Captured:", dataURL);
-      } else if (currentCapture === "side") {
-        setCapturedSide(true);
-        console.log("Side Image Captured:", dataURL);
+        const file = new File([blob], `${currentCapture}_image.png`, {
+          type: "image/png",
+        });
 
-        // 🔥 Stop the camera immediately
-        if (videoRef.current?.srcObject) {
+        if (currentCapture === "front") {
+          setCapturedFront(true);
+          setCapturedImages((prev) => ({ ...prev, front: file }));
+          setCurrentCapture("side");
+        } else if (currentCapture === "side") {
+          setCapturedSide(true);
+          setCapturedImages((prev) => ({ ...prev, side: file }));
+
+          // Stop camera and proceed
           const tracks = (
-            videoRef.current.srcObject as MediaStream
-          ).getTracks();
-          tracks.forEach((track) => track.stop());
-          videoRef.current.srcObject = null;
-        }
+            videoRef.current?.srcObject as MediaStream
+          )?.getTracks();
+          tracks?.forEach((track) => track.stop());
 
-        // ⏳ Add a delay (e.g., 1 second) before proceeding
-        setTimeout(() => {
-          onProceedToMeasurements(); // Replace with your actual redirect function
-        }, 1500); // 1000ms = 1 second
-      }
+          setTimeout(() => {
+            onProceedToMeasurements();
+          }, 1500);
+        }
+      }, "image/png");
     }
   };
 

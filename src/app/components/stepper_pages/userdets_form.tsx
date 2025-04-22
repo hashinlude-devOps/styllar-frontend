@@ -2,13 +2,15 @@
 "use client";
 import { useState } from "react";
 import GenderSelect from "../common/select_gender";
+import { UserDetailsFormProps } from "@/app/types/UserDetails";
 
-export default function UserDetsFormContent() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [dob, setDob] = useState("");
-  const [weight, setWeight] = useState("");
-  const [height, setHeight] = useState("");
+export default function UserDetsFormContent({
+  userDetails,
+  setUserDetails,
+}: UserDetailsFormProps) {
+  const handleChange = (field: string, value: string) => {
+    setUserDetails((prev: any) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div className="flex flex-col gap-[1.5rem]">
@@ -22,26 +24,31 @@ export default function UserDetsFormContent() {
       <input
         type="text"
         placeholder="Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
+        value={userDetails.name}
+        onChange={(e) => handleChange("name", e.target.value)}
         className="flex max-w-[30rem] h-[3.5rem] px-5 py-4 flex-col justify-center items-start gap-1 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
       />
 
       <input
         type="email"
         placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        value={userDetails.email}
+        onChange={(e) => handleChange("email", e.target.value)}
         className="flex max-w-[30rem] h-[3.5rem] px-5 py-4 flex-col justify-center items-start gap-1 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
       />
 
-      <GenderSelect />
+      <GenderSelect
+        selectedGender={userDetails.gender}
+        onGenderChange={(gender) =>
+          setUserDetails((prev) => ({ ...prev, gender }))
+        }
+      />
 
       <input
         type="date"
         placeholder="Date of Birth"
-        value={dob}
-        onChange={(e) => setDob(e.target.value)}
+        value={userDetails.dob}
+        onChange={(e) => handleChange("dob", e.target.value)}
         className="custom-date-input max-w-[30rem] h-[3.5rem] px-5 py-4 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
       />
 
@@ -50,8 +57,8 @@ export default function UserDetsFormContent() {
         <input
           type="number"
           placeholder="Weight (kg)"
-          value={weight}
-          onChange={(e) => setWeight(e.target.value)}
+          value={userDetails.weight}
+          onChange={(e) => handleChange("weight", e.target.value)}
           className="w-full h-[3.5rem] px-5 py-4 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
         />
       </div>
@@ -61,8 +68,8 @@ export default function UserDetsFormContent() {
         <input
           type="number"
           placeholder="Height (cm)"
-          value={height}
-          onChange={(e) => setHeight(e.target.value)}
+          value={userDetails.height}
+          onChange={(e) => handleChange("height", e.target.value)}
           className="w-full h-[3.5rem] px-5 py-4 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
         />
       </div>
