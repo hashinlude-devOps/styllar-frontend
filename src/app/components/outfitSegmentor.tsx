@@ -19,6 +19,7 @@ export default function OutfitSegmentor({
   const [contours, setContours] = useState<any[]>([]);
   const [masks, setMasks] = useState<string[]>([]);
   const [maskInfo, setMaskInfo] = useState<MaskInfo>(null);
+  
   // Animation parameters
   const glowAmountRef = useRef(0);
   const increasingRef = useRef(true);
@@ -76,11 +77,11 @@ export default function OutfitSegmentor({
       if (!canvas) return;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
-      
+
       // Clear and redraw base image
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(imgEl, 0, 0);
-      
+
       // Update glow amount for animation
       if (increasingRef.current) {
         glowAmountRef.current += 0.05;
@@ -93,7 +94,7 @@ export default function OutfitSegmentor({
           increasingRef.current = true;
         }
       }
-      
+
       // Draw all contours
       contours.forEach((contour, index) => {
         ctx.save();
@@ -104,37 +105,31 @@ export default function OutfitSegmentor({
           ctx.lineTo(pts[i][0], pts[i][1]);
         }
         ctx.closePath();
-        
+
         if (maskInfo && index === maskInfo.index) {
           // Active selection with glowing effect
-          // Set shadow properties for glow
           ctx.shadowColor = "rgba(0, 255, 255, 0.8)";
-          ctx.shadowBlur = 10 + (glowAmountRef.current * 15);
+          ctx.shadowBlur = 10 + glowAmountRef.current * 15;
           ctx.lineWidth = 3;
           ctx.strokeStyle = "rgb(0, 255, 255)";
           ctx.stroke();
-          
-          // Fill with semi-transparent color
-          ctx.globalAlpha = 0.3 + (glowAmountRef.current * 0.2);
+
+          ctx.globalAlpha = 0.3 + glowAmountRef.current * 0.2;
           ctx.fillStyle = "rgba(0, 255, 255, 0.5)";
           ctx.fill();
-        } else {
-          // Non-selected contours
-          ctx.lineWidth = 1;
-          // ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-          ctx.stroke();
         }
-        
+        // 🧼 No `else` case — don't stroke non-selected masks
+
         ctx.restore();
       });
-      
+
       // Continue animation loop
       animationRef.current = requestAnimationFrame(updateCanvas);
     };
-    
+
     // Start animation loop
     animationRef.current = requestAnimationFrame(updateCanvas);
-    
+
     // Clean up animation on unmount or when selection changes
     return () => {
       if (animationRef.current) {
@@ -190,7 +185,7 @@ export default function OutfitSegmentor({
   const handleClick = (e: React.MouseEvent) => {
     // Optional: Add click functionality to lock selection
     // This would let users click to keep a segment selected
-    console.log("selected")
+    console.log("selected");
   };
 
   return (
