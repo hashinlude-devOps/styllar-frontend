@@ -11,7 +11,9 @@ export default function CameraCapture({
   const streamRef = useRef<MediaStream | null>(null);
   const [capturedFront, setCapturedFront] = useState(false);
   const [capturedSide, setCapturedSide] = useState(false);
-  const [currentCapture, setCurrentCapture] = useState<"front" | "side">("front");
+  const [currentCapture, setCurrentCapture] = useState<"front" | "side">(
+    "front"
+  );
   const [isProcessing, setIsProcessing] = useState(false);
   const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -25,7 +27,7 @@ export default function CameraCapture({
 
   const stopCurrentStream = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
   };
@@ -43,18 +45,23 @@ export default function CameraCapture({
       // First try with exact constraint to force the specific camera
       const constraints = {
         video: {
-          facingMode: { exact: facingMode }
-        }
+          facingMode: { exact: facingMode },
+        },
       };
 
       try {
-        streamRef.current = await navigator.mediaDevices.getUserMedia(constraints);
+        streamRef.current = await navigator.mediaDevices.getUserMedia(
+          constraints
+        );
       } catch (exactError) {
-        console.log("Failed with exact constraint, trying with preference:", exactError);
-        
+        console.log(
+          "Failed with exact constraint, trying with preference:",
+          exactError
+        );
+
         // If that fails, try with preference only
         streamRef.current = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: facingMode }
+          video: { facingMode: facingMode },
         });
       }
 
@@ -64,20 +71,22 @@ export default function CameraCapture({
       }
     } catch (error) {
       console.error("Error accessing camera:", error);
-      setCameraError("Failed to access camera. Please check permissions or try a different browser.");
+      setCameraError(
+        "Failed to access camera. Please check permissions or try a different browser."
+      );
     }
   };
 
   useEffect(() => {
     startCamera();
-    
+
     return () => {
       stopCurrentStream();
     };
   }, [facingMode]);
 
   const toggleCamera = () => {
-    setFacingMode(prevMode => prevMode === "user" ? "environment" : "user");
+    setFacingMode((prevMode) => (prevMode === "user" ? "environment" : "user"));
   };
 
   const captureImage = () => {
@@ -164,7 +173,7 @@ export default function CameraCapture({
         className="absolute top-4 left-4 z-20 p-3 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
         disabled={isProcessing}
       >
-        <FaSync className={`text-lg ${isProcessing ? 'opacity-50' : ''}`} />
+        <FaSync className={`text-lg ${isProcessing ? "opacity-50" : ""}`} />
       </button>
 
       {/* Capture status indicator */}
@@ -189,7 +198,7 @@ export default function CameraCapture({
       <div className="absolute bottom-6 flex justify-center w-full z-10">
         <button
           onClick={captureImage}
-          disabled={capturedFront && capturedSide || isProcessing || !streamRef.current}
+          // disabled={capturedFront && capturedSide || isProcessing || !streamRef.current}
           className="rounded-[1rem] py-[1rem] px-[1.5rem] bg-[#2121216b] backdrop-blur-[7.5px] w-full max-w-[200px] flex items-center justify-center gap-2 text-white disabled:opacity-50 transition-opacity"
         >
           <FaCamera className="text-white/70 text-lg" />
