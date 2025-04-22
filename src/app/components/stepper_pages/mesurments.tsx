@@ -3,7 +3,11 @@ import Avatar from "../../../../public/images/avatar.png";
 import { useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-export default function Mesurments({ measurements }: any) {
+export default function Mesurments({
+  measurements,
+  attributes,
+  setMeasurements,
+}: any) {
   const [skinTone, setSkinTone] = useState([
     { key: "skin_tone_1", hex: "#f6ede4" },
     { key: "skin_tone_2", hex: "#f3e7db" },
@@ -19,12 +23,6 @@ export default function Mesurments({ measurements }: any) {
 
   const [selectedSkinToneIndex, setSelectedSkinToneIndex] = useState(1);
 
-  // const updateValue = (index: number, delta: number) => {
-  //   setMesurments((prev) =>
-  //     prev.map((m, i) => (i === index ? { ...m, value: m.value + delta } : m))
-  //   );
-  // };
-
   const handlePrevSkinTone = () => {
     setSelectedSkinToneIndex((prev) =>
       prev === 0 ? skinTone.length - 1 : prev - 1
@@ -34,6 +32,16 @@ export default function Mesurments({ measurements }: any) {
   const handleNextSkinTone = () => {
     setSelectedSkinToneIndex((prev) =>
       prev === skinTone.length - 1 ? 0 : prev + 1
+    );
+  };
+
+  const updateValue = (index: number, delta: number) => {
+    setMeasurements((prev: any[]) =>
+      prev.map((item, i) =>
+        i === index
+          ? { ...item, value: Math.max(0, (item.value || 0) + delta) }
+          : item
+      )
     );
   };
 
@@ -82,46 +90,46 @@ export default function Mesurments({ measurements }: any) {
         <div className="w-[50%] max-h-[38vh] overflow-scroll scrollbar-hide">
           {measurements && (
             <div className="flex flex-col gap-[0.5rem]">
-              {Object.entries(measurements)
-                ?.map(([key, value]) => ({
-                  key,
-                  value: Number(value).toFixed(2),
-                  unit: "CM",
-                }))
-                ?.map((measurement, index) => (
-                  <div
-                    key={index}
-                    className="p-[0.5rem] bg-[#212121CC] rounded-[0.95rem] h-[4rem]"
-                  >
-                    <div className="text-white text-[0.634rem] font-bold">
-                      {measurement.key}
+              {measurements?.map((measurement: any, index: any) => (
+                <div
+                  key={index}
+                  className="p-[0.5rem] bg-[#212121CC] rounded-[0.95rem] h-[4rem]"
+                >
+                  <div className="text-white text-[0.634rem] font-bold">
+                    {measurement.key
+                      ?.split("_")
+                      .map(
+                        (word: any) =>
+                          word.charAt(0).toUpperCase() + word.slice(1)
+                      )
+                      .join(" ")}
+                  </div>
+                  <div className="flex justify-between items-center gap-2">
+                    <div className="flex items-baseline gap-1">
+                      <div className="text-[1.5rem] text-[#3AAEF8]">
+                        {Number((measurement as any)?.value).toFixed(2)}
+                      </div>
+                      <div className="text-[0.5rem] text-[#8A8B8F]">
+                        {measurement.unit}
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center gap-2">
-                      <div className="flex items-baseline gap-1">
-                        <div className="text-[1.5rem] text-[#3AAEF8]">
-                          {(measurement as any)?.value}
-                        </div>
-                        <div className="text-[0.5rem] text-[#8A8B8F]">
-                          {measurement.unit}
-                        </div>
-                      </div>
-                      <div className="flex gap-[0.5rem]">
-                        <button
-                          // onClick={() => updateValue(index, -1)}
-                          className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
-                        >
-                          –
-                        </button>
-                        <button
-                          // onClick={() => updateValue(index, 1)}
-                          className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
-                        >
-                          +
-                        </button>
-                      </div>
+                    <div className="flex gap-[0.5rem]">
+                      <button
+                        onClick={() => updateValue(index, -1)}
+                        className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                      >
+                        –
+                      </button>
+                      <button
+                        // onClick={() => updateValue(index, 1)}
+                        className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                      >
+                        +
+                      </button>
                     </div>
                   </div>
-                ))}
+                </div>
+              ))}
 
               {/* Skin Tone Card */}
               <div className="p-[0.5rem] bg-[#212121CC] rounded-[0.95rem] h-[4rem] flex flex-col justify-between">
