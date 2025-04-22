@@ -15,7 +15,6 @@ import {
 } from "../../../lib/query/queries";
 import WardrobeUpload from "./stepper_pages/wardrobe_upload";
 import Predictions from "./stepper_pages/predictions";
-import Wardrobe from "./stepper_pages/wardbode";
 
 export default function Stepper() {
   const [step, setStep] = useState(1);
@@ -136,9 +135,6 @@ export default function Stepper() {
         );
 
       case 6:
-        return <Wardrobe key="step6" />;
-
-      case 7:
         return <Predictions key="step7" />;
       default:
         return null;
@@ -220,7 +216,7 @@ export default function Stepper() {
           <BackwardArrow />
         </button>
 
-        {step !== 7 && (
+        {step !== 6 && (
           <button
             onClick={handleNext}
             disabled={!isNextEnabled}
