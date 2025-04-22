@@ -1,6 +1,5 @@
 // components/FormContent.tsx
 "use client";
-import { useState } from "react";
 import GenderSelect from "../common/select_gender";
 import { UserDetailsFormProps } from "@/app/types/UserDetails";
 
