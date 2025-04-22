@@ -3,14 +3,7 @@ import Avatar from "../../../../public/images/avatar.png";
 import { useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-export default function Mesurments() {
-  const [mesurments, setMesurments] = useState([
-    { key: "Height", value: 168, unit: "CM" },
-    { key: "Chest", value: 86, unit: "CM" },
-    { key: "Waist", value: 66, unit: "CM" },
-    { key: "Hip", value: 91, unit: "CM" },
-  ]);
-
+export default function Mesurments({ measurements }: any) {
   const [skinTone, setSkinTone] = useState([
     { key: "skin_tone_1", hex: "#f6ede4" },
     { key: "skin_tone_2", hex: "#f3e7db" },
@@ -26,11 +19,11 @@ export default function Mesurments() {
 
   const [selectedSkinToneIndex, setSelectedSkinToneIndex] = useState(1);
 
-  const updateValue = (index: number, delta: number) => {
-    setMesurments((prev) =>
-      prev.map((m, i) => (i === index ? { ...m, value: m.value + delta } : m))
-    );
-  };
+  // const updateValue = (index: number, delta: number) => {
+  //   setMesurments((prev) =>
+  //     prev.map((m, i) => (i === index ? { ...m, value: m.value + delta } : m))
+  //   );
+  // };
 
   const handlePrevSkinTone = () => {
     setSelectedSkinToneIndex((prev) =>
@@ -86,75 +79,83 @@ export default function Mesurments() {
         </div>
 
         {/* Right: Measurements & Skin Tone */}
-        <div className="w-[50%]">
-          <div className="flex flex-col gap-[0.5rem]">
-            {mesurments.map((measurement, index) => (
-              <div
-                key={index}
-                className="p-[0.5rem] bg-[#212121CC] rounded-[0.95rem] h-[4rem]"
-              >
-                <div className="text-white text-[0.634rem] font-bold">
-                  {measurement.key}
-                </div>
-                <div className="flex justify-between items-center gap-2">
-                  <div className="flex items-baseline gap-1">
-                    <div className="text-[1.5rem] text-[#3AAEF8]">
-                      {measurement.value}
+        <div className="w-[50%] max-h-[38vh] overflow-scroll scrollbar-hide">
+          {measurements && (
+            <div className="flex flex-col gap-[0.5rem]">
+              {Object.entries(measurements)
+                ?.map(([key, value]) => ({
+                  key,
+                  value: Number(value).toFixed(2),
+                  unit: "CM",
+                }))
+                ?.map((measurement, index) => (
+                  <div
+                    key={index}
+                    className="p-[0.5rem] bg-[#212121CC] rounded-[0.95rem] h-[4rem]"
+                  >
+                    <div className="text-white text-[0.634rem] font-bold">
+                      {measurement.key}
                     </div>
-                    <div className="text-[0.5rem] text-[#8A8B8F]">
-                      {measurement.unit}
+                    <div className="flex justify-between items-center gap-2">
+                      <div className="flex items-baseline gap-1">
+                        <div className="text-[1.5rem] text-[#3AAEF8]">
+                          {(measurement as any)?.value}
+                        </div>
+                        <div className="text-[0.5rem] text-[#8A8B8F]">
+                          {measurement.unit}
+                        </div>
+                      </div>
+                      <div className="flex gap-[0.5rem]">
+                        <button
+                          // onClick={() => updateValue(index, -1)}
+                          className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                        >
+                          –
+                        </button>
+                        <button
+                          // onClick={() => updateValue(index, 1)}
+                          className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                   </div>
+                ))}
+
+              {/* Skin Tone Card */}
+              <div className="p-[0.5rem] bg-[#212121CC] rounded-[0.95rem] h-[4rem] flex flex-col justify-between">
+                <div className="text-white text-[0.634rem] font-bold">
+                  Skin tone
+                </div>
+                <div className="flex items-center justify-between">
+                  {/* Skin tone swatch on the left */}
+                  <div
+                    style={{
+                      backgroundColor: skinTone[selectedSkinToneIndex].hex,
+                    }}
+                    className="h-6 w-10 rounded-lg"
+                  />
+
+                  {/* Buttons on the right */}
                   <div className="flex gap-[0.5rem]">
                     <button
-                      onClick={() => updateValue(index, -1)}
-                      className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                      onClick={handlePrevSkinTone}
+                      className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white"
                     >
-                      –
+                      <FaChevronLeft />
                     </button>
                     <button
-                      onClick={() => updateValue(index, 1)}
-                      className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                      onClick={handleNextSkinTone}
+                      className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white"
                     >
-                      +
+                      <FaChevronRight />
                     </button>
                   </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Skin Tone Card */}
-            <div className="p-[0.5rem] bg-[#212121CC] rounded-[0.95rem] h-[4rem] flex flex-col justify-between">
-              <div className="text-white text-[0.634rem] font-bold">
-                Skin tone
-              </div>
-              <div className="flex items-center justify-between">
-                {/* Skin tone swatch on the left */}
-                <div
-                  style={{
-                    backgroundColor: skinTone[selectedSkinToneIndex].hex,
-                  }}
-                  className="h-6 w-10 rounded-lg"
-                />
-
-                {/* Buttons on the right */}
-                <div className="flex gap-[0.5rem]">
-                  <button
-                    onClick={handlePrevSkinTone}
-                    className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white"
-                  >
-                    <FaChevronLeft />
-                  </button>
-                  <button
-                    onClick={handleNextSkinTone}
-                    className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white"
-                  >
-                    <FaChevronRight />
-                  </button>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>

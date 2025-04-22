@@ -14,6 +14,7 @@ import {
 export default function Stepper() {
   const [step, setStep] = useState(1);
   const [isNextEnabled, setIsNextEnabled] = useState(true);
+  const [mesurments, setMesurments] = useState<any>();
 
   const handleNext = () => setStep((prev) => Math.min(prev + 1, 4));
   const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
@@ -32,7 +33,6 @@ export default function Stepper() {
     side: File | null;
   }>({ front: null, side: null });
 
-  // ✅ Only set enable/disable here
   useEffect(() => {
     if (step === 1) {
       const isValid =
@@ -79,7 +79,7 @@ export default function Stepper() {
           />
         );
       case 4:
-        return <Mesurments key="step1" />;
+        return <Mesurments key="step1" measurements={mesurments} />;
 
       default:
         return null;
@@ -87,8 +87,6 @@ export default function Stepper() {
   };
 
   const callUploadMeasurements = async () => {
-    console.log("🚀 Payload before upload:", capturedImages);
-
     try {
       const payload = {
         frontImage: capturedImages.front!,
@@ -98,15 +96,12 @@ export default function Stepper() {
         gender: userDetails.gender as "male" | "female",
       };
 
-      // Use Promise.all to call both APIs at the same time
       const [measurementsResponse, attributesResponse] = await Promise.all([
-        uploadMeasurements(payload), // Upload measurements
-        uploadAttributes(capturedImages.front!), // Upload attributes
+        uploadMeasurements(payload),
+        uploadAttributes(capturedImages.front!),
       ]);
 
-      console.log("✅ Measurement Upload Response:", measurementsResponse);
-      console.log("✅ Attribute Prediction Response:", attributesResponse);
-      // optionally store the responses in state or handle them as needed
+      setMesurments((measurementsResponse as any)?.measurements);
     } catch (error) {
       console.error("❌ Failed to upload data:", error);
     }
