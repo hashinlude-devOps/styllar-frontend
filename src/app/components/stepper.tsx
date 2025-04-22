@@ -40,7 +40,7 @@ export default function Stepper() {
         userDetails.weight.trim() !== "" &&
         userDetails.gender.trim() !== "";
       setIsNextEnabled(isValid);
-    } else if (step === 2 || step === 3) {
+    } else {
       setIsNextEnabled(false);
     }
   }, [step, userDetails]);

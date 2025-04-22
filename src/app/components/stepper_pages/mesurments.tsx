@@ -84,7 +84,10 @@ export default function Mesurments({ measurements }: any) {
             <div className="flex flex-col gap-[0.5rem]">
               {Object.entries(measurements)
                 ?.map(([key, value]) => ({
-                  key,
+                  key: key
+                    ?.split("_")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" "),
                   value: Number(value).toFixed(2),
                   unit: "CM",
                 }))
