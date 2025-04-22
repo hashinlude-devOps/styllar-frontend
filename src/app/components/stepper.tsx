@@ -89,8 +89,6 @@ export default function Stepper() {
     }
   }, [step, measurements, maskData]);
 
-  console.log(step, isNextEnabled);
-
   const renderStepContent = () => {
     switch (step) {
       case 1:
