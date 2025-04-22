@@ -6,6 +6,7 @@ import UserDetsFormContent from "./stepper_pages/userdets_form";
 import { BackwardArrow, ForwardArrow } from "./svg";
 import Mesurments from "./stepper_pages/mesurments";
 import CameraCapture from "./stepper_pages/camera_capture";
+import { uploadMeasurements } from "../../../lib/query/queries";
 
 export default function Stepper() {
   const [step, setStep] = useState(1);
@@ -13,6 +14,20 @@ export default function Stepper() {
 
   const handleNext = () => setStep((prev) => Math.min(prev + 1, 4));
   const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
+
+  const [userDetails, setUserDetails] = useState({
+    name: "",
+    email: "",
+    dob: "",
+    height: "",
+    weight: "",
+    gender: "",
+  });
+
+  const [capturedImages, setCapturedImages] = useState<{
+    front: File | null;
+    side: File | null;
+  }>({ front: null, side: null });
 
   // ✅ Only set enable/disable here
   useEffect(() => {
@@ -23,7 +38,13 @@ export default function Stepper() {
   const renderStepContent = () => {
     switch (step) {
       case 1:
-        return <UserDetsFormContent key="step1" />;
+        return (
+          <UserDetsFormContent
+            key="step1"
+            userDetails={userDetails}
+            setUserDetails={setUserDetails}
+          />
+        );
       case 2:
         return (
           <Instructions
@@ -36,8 +57,13 @@ export default function Stepper() {
         return (
           <CameraCapture
             key="step3"
-            onProceedToMeasurements={handleNext}
+            // onProceedToMeasurements={handleNext}
+            onProceedToMeasurements={async () => {
+              await callUploadMeasurements(); // defined below
+              handleNext(); // move to Mesurments screen
+            }}
             onGoBack={handlePrev}
+            setCapturedImages={setCapturedImages}
           />
         );
       case 4:
@@ -45,6 +71,24 @@ export default function Stepper() {
 
       default:
         return null;
+    }
+  };
+
+  const callUploadMeasurements = async () => {
+    try {
+      const payload = {
+        frontImage: capturedImages.front!,
+        sideImage: capturedImages.side!,
+        height: parseFloat(userDetails.height),
+        weight: parseFloat(userDetails.weight),
+        gender: userDetails.gender as "male" | "female",
+      };
+
+      const response = await uploadMeasurements(payload);
+      console.log("✅ API Response:", response);
+      // optionally store it in state
+    } catch (error) {
+      console.error("❌ Failed to upload measurements", error);
     }
   };
 
