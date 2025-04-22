@@ -159,22 +159,22 @@ export default function Stepper() {
         }))
       );
 
-      setAttributes((prev: any[]) =>
-        prev.map((item) => ({
-          ...item,
-          value: (attributesResponse as any)[0].mapped_predictions ?? null,
-        }))
-      );
+      // setAttributes((prev: any[]) =>
+      //   prev.map((item) => ({
+      //     ...item,
+      //     value: (attributesResponse as any)[0].mapped_predictions ?? null,
+      //   }))
+      // );
 
-      setAttributes(
-        (attributesResponse as any)?.predictions.map(
-          ({ bounding_box, mapped_predictions, numeric_predictions }: any) => ({
-            bounding_box,
-            mapped_predictions,
-            numeric_predictions,
-          })
-        )
-      );
+      // setAttributes(
+      //   (attributesResponse as any)?.predictions.map(
+      //     ({ bounding_box, mapped_predictions, numeric_predictions }: any) => ({
+      //       bounding_box,
+      //       mapped_predictions,
+      //       numeric_predictions,
+      //     })
+      //   )
+      // );
     } catch (error) {
       console.error(error);
     }
