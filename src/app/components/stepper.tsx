@@ -35,6 +35,12 @@ export default function Stepper() {
     else if (step === 2 || step === 3) setIsNextEnabled(false);
   }, [step]);
 
+  useEffect(() => {
+    if (step === 4 && capturedImages.front && capturedImages.side) {
+      callUploadMeasurements();
+    }
+  }, [step, capturedImages]);
+
   const renderStepContent = () => {
     switch (step) {
       case 1:
@@ -57,11 +63,7 @@ export default function Stepper() {
         return (
           <CameraCapture
             key="step3"
-            // onProceedToMeasurements={handleNext}
-            onProceedToMeasurements={async () => {
-              await callUploadMeasurements(); // defined below
-              handleNext(); // move to Mesurments screen
-            }}
+            onProceedToMeasurements={handleNext}
             onGoBack={handlePrev}
             setCapturedImages={setCapturedImages}
           />
@@ -75,6 +77,8 @@ export default function Stepper() {
   };
 
   const callUploadMeasurements = async () => {
+    console.log("🚀 Payload before upload:", capturedImages);
+
     try {
       const payload = {
         frontImage: capturedImages.front!,

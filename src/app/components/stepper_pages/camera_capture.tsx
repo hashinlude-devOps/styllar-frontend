@@ -13,6 +13,7 @@ export default function CameraCapture({
   const [currentCapture, setCurrentCapture] = useState<"front" | "side">(
     "front"
   );
+  const [isProcessing, setIsProcessing] = useState(false); // disables capture button during state switch
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -27,7 +28,6 @@ export default function CameraCapture({
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "user" },
         });
-
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -47,69 +47,52 @@ export default function CameraCapture({
   }, []);
 
   const captureImage = () => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || isProcessing) return;
+
+    console.log("📸 Capturing:", currentCapture);
+    setIsProcessing(true);
 
     const canvas = document.createElement("canvas");
     canvas.width = videoRef.current.videoWidth;
     canvas.height = videoRef.current.videoHeight;
-
     const ctx = canvas.getContext("2d");
-    // if (ctx) {
-    //   ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-    //   const dataURL = canvas.toDataURL("image/png");
 
-    //   if (currentCapture === "front") {
-    //     setCapturedFront(true);
-    //     setCurrentCapture("side");
-    //     console.log("Front Image Captured:", dataURL);
-    //   } else if (currentCapture === "side") {
-    //     setCapturedSide(true);
-    //     console.log("Side Image Captured:", dataURL);
+    if (!ctx) return;
+    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
-    //     // 🔥 Stop the camera immediately
-    //     if (videoRef.current?.srcObject) {
-    //       const tracks = (
-    //         videoRef.current.srcObject as MediaStream
-    //       ).getTracks();
-    //       tracks.forEach((track) => track.stop());
-    //       videoRef.current.srcObject = null;
-    //     }
+    canvas.toBlob((blob) => {
+      if (!blob) return;
 
-    //     // ⏳ Add a delay (e.g., 1 second) before proceeding
-    //     setTimeout(() => {
-    //       onProceedToMeasurements(); // Replace with your actual redirect function
-    //     }, 1500); // 1000ms = 1 second
-    //   }
-    // }
-    if (ctx) {
-      ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob((blob) => {
-        if (!blob) return;
+      const file = new File([blob], `${currentCapture}_image.png`, {
+        type: "image/png",
+      });
 
-        const file = new File([blob], `${currentCapture}_image.png`, {
-          type: "image/png",
+      if (currentCapture === "front") {
+        setCapturedFront(true);
+        setCapturedImages((prev) => ({ ...prev, front: file }));
+        setTimeout(() => {
+          setCurrentCapture("side");
+          setIsProcessing(false);
+        }, 200);
+      } else {
+        setCapturedSide(true);
+        setCapturedImages((prev) => {
+          const updated = { ...prev, side: file };
+          console.log("📤 Final Payload before upload:", updated);
+          return updated;
         });
 
-        if (currentCapture === "front") {
-          setCapturedFront(true);
-          setCapturedImages((prev) => ({ ...prev, front: file }));
-          setCurrentCapture("side");
-        } else if (currentCapture === "side") {
-          setCapturedSide(true);
-          setCapturedImages((prev) => ({ ...prev, side: file }));
-
-          // Stop camera and proceed
-          const tracks = (
-            videoRef.current?.srcObject as MediaStream
-          )?.getTracks();
-          tracks?.forEach((track) => track.stop());
-
-          setTimeout(() => {
-            onProceedToMeasurements();
-          }, 1500);
-        }
-      }, "image/png");
-    }
+        setTimeout(() => {
+          if (videoRef.current?.srcObject) {
+            const tracks = (
+              videoRef.current.srcObject as MediaStream
+            ).getTracks();
+            tracks.forEach((track) => track.stop());
+          }
+          onProceedToMeasurements();
+        }, 1000);
+      }
+    }, "image/png");
   };
 
   useEffect(() => {
@@ -119,7 +102,7 @@ export default function CameraCapture({
         tracks.forEach((track) => track.stop());
       }
     }
-  }, [capturedFront, capturedSide, onProceedToMeasurements]);
+  }, [capturedFront, capturedSide]);
 
   const handleGoBack = () => {
     if (videoRef.current?.srcObject) {
@@ -127,7 +110,7 @@ export default function CameraCapture({
       tracks.forEach((track) => track.stop());
       videoRef.current.srcObject = null;
     }
-    onGoBack(); // ⬅️ go back to previous step/screen
+    onGoBack();
   };
 
   return (
@@ -140,7 +123,7 @@ export default function CameraCapture({
         className="w-full h-full object-cover"
       />
 
-      {/* Close Button in Top-Right */}
+      {/* Close Button */}
       <button
         onClick={handleGoBack}
         className="absolute top-4 right-4 z-20 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
@@ -148,23 +131,25 @@ export default function CameraCapture({
         <FaTimes className="text-lg" />
       </button>
 
+      {/* Capture status indicator */}
       <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-4 z-10">
         <button
           className={`p-3 rounded-full backdrop-blur-sm text-white ${
             capturedFront ? "bg-green-500" : "bg-white/20"
           }`}
         >
-          <img src="/frontpose.svg" alt="icon" width={42} height={42} />
+          <img src="/frontpose.svg" alt="Front" width={42} height={42} />
         </button>
         <button
           className={`p-3 rounded-full backdrop-blur-sm text-white ${
             capturedSide ? "bg-green-500" : "bg-white/20"
           }`}
         >
-          <img src="/sidepose.svg" alt="icon" width={42} height={42} />
+          <img src="/sidepose.svg" alt="Side" width={42} height={42} />
         </button>
       </div>
 
+      {/* Capture button */}
       <div className="absolute bottom-6 flex justify-center w-full z-10">
         <button
           onClick={captureImage}
