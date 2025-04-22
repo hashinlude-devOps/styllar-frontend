@@ -1,6 +1,6 @@
 import { CameraCaptureProps } from "@/app/types/UserDetails";
 import { useEffect, useRef, useState } from "react";
-import { FaCamera, FaTimes } from "react-icons/fa";
+import { FaCamera, FaTimes, FaSync } from "react-icons/fa";
 
 export default function CameraCapture({
   onProceedToMeasurements,
@@ -8,12 +8,13 @@ export default function CameraCapture({
   setCapturedImages,
 }: CameraCaptureProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
   const [capturedFront, setCapturedFront] = useState(false);
   const [capturedSide, setCapturedSide] = useState(false);
-  const [currentCapture, setCurrentCapture] = useState<"front" | "side">(
-    "front"
-  );
-  const [isProcessing, setIsProcessing] = useState(false); // disables capture button during state switch
+  const [currentCapture, setCurrentCapture] = useState<"front" | "side">("front");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
+  const [cameraError, setCameraError] = useState<string | null>(null);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -22,32 +23,65 @@ export default function CameraCapture({
     };
   }, []);
 
-  useEffect(() => {
-    const startCamera = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "user" },
-        });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+  const stopCurrentStream = () => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+  };
+
+  const startCamera = async () => {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraError("Your browser does not support camera access.");
+      return;
+    }
+
+    // Stop any existing stream first
+    stopCurrentStream();
+
+    try {
+      // First try with exact constraint to force the specific camera
+      const constraints = {
+        video: {
+          facingMode: { exact: facingMode }
         }
-      } catch (error) {
-        console.error("Error accessing camera:", error);
-      }
-    };
+      };
 
+      try {
+        streamRef.current = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (exactError) {
+        console.log("Failed with exact constraint, trying with preference:", exactError);
+        
+        // If that fails, try with preference only
+        streamRef.current = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: facingMode }
+        });
+      }
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = streamRef.current;
+        setCameraError(null);
+      }
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+      setCameraError("Failed to access camera. Please check permissions or try a different browser.");
+    }
+  };
+
+  useEffect(() => {
     startCamera();
-
+    
     return () => {
-      if (videoRef.current?.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach((track) => track.stop());
-      }
+      stopCurrentStream();
     };
-  }, []);
+  }, [facingMode]);
+
+  const toggleCamera = () => {
+    setFacingMode(prevMode => prevMode === "user" ? "environment" : "user");
+  };
 
   const captureImage = () => {
-    if (!videoRef.current || isProcessing) return;
+    if (!videoRef.current || isProcessing || !streamRef.current) return;
 
     setIsProcessing(true);
 
@@ -81,12 +115,7 @@ export default function CameraCapture({
         });
 
         setTimeout(() => {
-          if (videoRef.current?.srcObject) {
-            const tracks = (
-              videoRef.current.srcObject as MediaStream
-            ).getTracks();
-            tracks.forEach((track) => track.stop());
-          }
+          stopCurrentStream();
           onProceedToMeasurements();
         }, 1000);
       }
@@ -95,19 +124,12 @@ export default function CameraCapture({
 
   useEffect(() => {
     if (capturedFront && capturedSide) {
-      if (videoRef.current?.srcObject) {
-        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-        tracks.forEach((track) => track.stop());
-      }
+      stopCurrentStream();
     }
   }, [capturedFront, capturedSide]);
 
   const handleGoBack = () => {
-    if (videoRef.current?.srcObject) {
-      const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
-      tracks.forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
-    }
+    stopCurrentStream();
     onGoBack();
   };
 
@@ -121,12 +143,28 @@ export default function CameraCapture({
         className="w-full h-full object-cover"
       />
 
+      {/* Camera Error Message */}
+      {cameraError && (
+        <div className="absolute top-1/2 left-0 right-0 bg-red-500/80 text-white py-2 px-4 text-center">
+          {cameraError}
+        </div>
+      )}
+
       {/* Close Button */}
       <button
         onClick={handleGoBack}
         className="absolute top-4 right-4 z-20 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
       >
         <FaTimes className="text-lg" />
+      </button>
+
+      {/* Camera Switch Button */}
+      <button
+        onClick={toggleCamera}
+        className="absolute top-4 left-4 z-20 p-3 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+        disabled={isProcessing}
+      >
+        <FaSync className={`text-lg ${isProcessing ? 'opacity-50' : ''}`} />
       </button>
 
       {/* Capture status indicator */}
@@ -151,7 +189,7 @@ export default function CameraCapture({
       <div className="absolute bottom-6 flex justify-center w-full z-10">
         <button
           onClick={captureImage}
-          disabled={capturedFront && capturedSide}
+          disabled={capturedFront && capturedSide || isProcessing || !streamRef.current}
           className="rounded-[1rem] py-[1rem] px-[1.5rem] bg-[#2121216b] backdrop-blur-[7.5px] w-full max-w-[200px] flex items-center justify-center gap-2 text-white disabled:opacity-50 transition-opacity"
         >
           <FaCamera className="text-white/70 text-lg" />

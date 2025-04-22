@@ -138,4 +138,29 @@ export const getPredictionImages = async ({ text }: any) => {
   });
 
   return response.data as any;
+
+export  const segmentOutfit = async (file: string) => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await axiosClient({
+    method: 'POST',
+    url: 'segment/creation',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+
+  return response.data;
+};
+
+export const fetchMaskData = async (fileName: string) => {
+  const response = await axiosClient({
+    method: 'GET',
+    url: `/files/${fileName}`,
+    responseType: 'arraybuffer',
+  });
+
+  return response.data;
 };
