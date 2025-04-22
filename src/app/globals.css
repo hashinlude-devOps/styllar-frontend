@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: linear-gradient(180deg, #2E3E61 0%, #6858B3 50%, #212A5B 100%);
+  --background: linear-gradient(180deg, #2e3e61 0%, #6858b3 50%, #212a5b 100%);
   --foreground: #171717;
   --font-primary: var(--font-montserrat), sans-serif;
 }
@@ -10,7 +10,6 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-montserrat), sans-serif;
-
 }
 
 .max-width-wrapper {
@@ -19,4 +18,16 @@ body {
 
 .custom-date-input::-webkit-calendar-picker-indicator {
   filter: invert(1);
+}
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.animate-scanline {
+  animation: scanline 2s linear infinite;
 }

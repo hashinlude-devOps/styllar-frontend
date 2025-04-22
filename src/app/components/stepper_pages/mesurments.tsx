@@ -1,13 +1,20 @@
 import Image from "next/image";
 import Avatar from "../../../../public/images/avatar.png";
+import { useState } from "react";
 
 export default function Mesurments() {
-  const mesurments = [
+  const [mesurments, setMesurments] = useState([
     { key: "Height", value: 168, unit: "CM" },
     { key: "Chest", value: 86, unit: "CM" },
     { key: "Waist", value: 66, unit: "CM" },
     { key: "Hip", value: 91, unit: "CM" },
-  ];
+  ]);
+
+  const updateValue = (index: number, delta: number) => {
+    setMesurments((prev) =>
+      prev.map((m, i) => (i === index ? { ...m, value: m.value + delta } : m))
+    );
+  };
   return (
     <>
       <div className="flex flex-col gap-[0.75rem]">
@@ -19,11 +26,37 @@ export default function Mesurments() {
           measurements if needed.
         </div>
       </div>
-      <div className="flex mt-[2.3rem] justify-between">
-        <div className="">
-          <Image alt="Avatar" height={100} width={150} src={Avatar} />
+      <div className="flex mt-[2.3rem] ">
+        <div className="w-[50%] h-[350px] relative bg-[url('/radial_gradient_bg.svg')] bg-cover bg-center flex items-center justify-center overflow-hidden group ">
+          {/* The image */}
+          <Image
+            alt="Avatar"
+            height={100}
+            width={150}
+            src={Avatar}
+            className="relative z-10"
+          />
+
+          {/* Scanline effect */}
+          <div className="absolute inset-0 z-20 pointer-events-none">
+            <div
+              className="absolute left-0 top-0 w-full h-full animate-scanline"
+              style={{
+                background:
+                  "linear-gradient(to bottom, transparent 0%, rgba(0,255,204,0.12) 45%, rgba(0,255,204,0.15) 55%, transparent 100%)",
+                filter: "blur(8px)",
+                maskImage: `
+        radial-gradient(farthest-side at 50% 50%, black 60%, transparent 100%)
+      `,
+                WebkitMaskImage: `
+        radial-gradient(farthest-side at 50% 50%, black 60%, transparent 100%)
+      `,
+              }}
+            />
+          </div>
         </div>
-        <div className="">
+
+        <div className="w-[50%]">
           <div className="flex flex-col gap-[0.5rem]">
             {mesurments.map((measurement, index) => (
               <div
@@ -44,12 +77,18 @@ export default function Mesurments() {
                     </div>
                   </div>
                   <div className="flex gap-[0.5rem]">
-                    <div className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-[14rem]  w-[2.135rem] flex items-center justify-center h-[1.5rem]">
-                      -
-                    </div>
-                    <div className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-[14rem]  w-[2.135rem] flex items-center justify-center h-[1.5rem]">
+                    <button
+                      onClick={() => updateValue(index, -1)}
+                      className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                    >
+                      –
+                    </button>
+                    <button
+                      onClick={() => updateValue(index, 1)}
+                      className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                    >
                       +
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>
