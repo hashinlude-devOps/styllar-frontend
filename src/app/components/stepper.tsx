@@ -96,14 +96,12 @@ export default function Stepper() {
         gender: userDetails.gender as "male" | "female",
       };
 
-      // Use Promise.all to call both APIs at the same time
       const [measurementsResponse, attributesResponse] = await Promise.all([
-        uploadMeasurements(payload), // Upload measurements
-        uploadAttributes(capturedImages.front!), // Upload attributes
+        uploadMeasurements(payload),
+        uploadAttributes(capturedImages.front!),
       ]);
 
       setMesurments((measurementsResponse as any)?.measurements);
-      // optionally store the responses in state or handle them as needed
     } catch (error) {
       console.error("❌ Failed to upload data:", error);
     }

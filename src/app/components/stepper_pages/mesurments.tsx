@@ -79,7 +79,7 @@ export default function Mesurments({ measurements }: any) {
         </div>
 
         {/* Right: Measurements & Skin Tone */}
-        <div className="w-[50%]">
+        <div className="w-[50%] max-h-[38vh] overflow-scroll scrollbar-hide">
           {measurements && (
             <div className="flex flex-col gap-[0.5rem]">
               {Object.entries(measurements)
