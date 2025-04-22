@@ -5,7 +5,7 @@ import path from "path";
 const nextConfig: NextConfig = {
   output: "standalone",
   images: {
-    domains: ["34.10.109.225"],
+    domains: ["34.10.109.225", "demo.styllar.ai"],
   },
   experimental: {
     turbo: {

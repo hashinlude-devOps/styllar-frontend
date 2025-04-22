@@ -105,9 +105,9 @@ export default function Predictions({ mesurements, attributes }: any) {
     const total = clothingKeys.length;
     const offset = (index - currentSlide + total) % total;
     const positions = [
-      "translate-x-0 z-30 scale-110",
-      "-translate-x-32 z-20 scale-90 rotate-[-10deg]",
-      "translate-x-32 z-20 scale-90 rotate-[10deg]",
+      "translate-x-0", // center
+      "-translate-x-32", // left
+      "translate-x-32", // right
     ];
     return positions[offset];
   };
@@ -140,42 +140,52 @@ export default function Predictions({ mesurements, attributes }: any) {
 
       {/* Image Slider */}
       <div
-        className="relative h-[140px] w-full flex items-center justify-center mb-6 overflow-hidden"
+        className="relative h-[300px] w-full flex items-center justify-center mb-6 overflow-hidden"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {images.map(
-          (img, idx) =>
-            img && (
-              <div
-                key={idx}
-                className={`absolute transition-all duration-500 ease-in-out transform ${getSlideStyle(
-                  idx
-                )} border-2 border-white rounded-xl overflow-hidden`}
-                style={{ width: 100, height: 100 }}
-              >
-                <Image
-                  src={`http://34.10.109.225:5000/files/${img}`}
-                  alt={`Prediction ${idx}`}
-                  height={100}
-                  width={100}
-                />
-              </div>
-            )
-        )}
+        {images.map((img, idx) => {
+          if (!img) return null;
+
+          const isActive = idx === currentSlide;
+
+          return (
+            <div
+              key={idx}
+              className={`absolute transition-all duration-500 ease-in-out transform 
+          ${getSlideStyle(idx)} 
+          ${
+            isActive ? "z-30 opacity-100 scale-110" : "z-10 opacity-40 scale-90"
+          } 
+          overflow-hidden`}
+              style={{
+                borderRadius: isActive ? 32 : 16,
+              }}
+            >
+              <Image
+                src={`https://demo.styllar.ai/api/files/${img}`}
+                alt={`Prediction ${idx}`}
+                width={isActive ? 260 : 200}
+                height={isActive ? 200 : 160}
+              />
+            </div>
+          );
+        })}
       </div>
 
       {/* Text Slider */}
       {prediction && (
         <div className="w-full px-4 bg-[#21212180] p-5 rounded-[2rem]">
-          <h3 className="text-xl font-bold capitalize mb-2 text-center">
+          {/* <h3 className="text-xl font-bold capitalize mb-2 text-center">
             {clothingKeys[currentSlide]}
-          </h3>
+          </h3> */}
           <p className="text-sm text-center">
             {prediction[getTabKey(activeTab)][clothingKeys[currentSlide]]}
           </p>
         </div>
       )}
+
+      {/* <div className="mt-10 w-full bg-[#212121CC] rounded-[24px] p-5">A</div> */}
     </div>
   );
 }
