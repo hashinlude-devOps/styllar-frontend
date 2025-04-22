@@ -101,20 +101,15 @@ export default function Predictions({ mesurements, attributes }: any) {
 
   const getTabKey = (tab: string) => tab.toLowerCase();
 
-  const getImageClass = (index: number) => {
-    const distance =
-      (index - currentSlide + clothingKeys.length) % clothingKeys.length;
-
-    switch (distance) {
-      case 0:
-        return "z-20 scale-110 rotate-0 opacity-100";
-      case 1:
-        return "z-10 scale-90 -rotate-12 opacity-40 -translate-x-8";
-      case 2:
-        return "z-10 scale-90 rotate-12 opacity-40 translate-x-8";
-      default:
-        return "hidden";
-    }
+  const getSlideStyle = (index: number) => {
+    const total = clothingKeys.length;
+    const offset = (index - currentSlide + total) % total;
+    const positions = [
+      "translate-x-0 z-30 scale-110",
+      "-translate-x-32 z-20 scale-90 rotate-[-10deg]",
+      "translate-x-32 z-20 scale-90 rotate-[10deg]",
+    ];
+    return positions[offset];
   };
 
   return (
@@ -143,14 +138,18 @@ export default function Predictions({ mesurements, attributes }: any) {
         ))}
       </div>
 
-      {/* Cylindrical-style image layout */}
-      <div className="relative h-[120px] w-full flex items-center justify-center mb-6">
+      {/* Image Slider */}
+      <div
+        className="relative h-[140px] w-full flex items-center justify-center mb-6 overflow-hidden"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {images.map(
           (img, idx) =>
             img && (
               <div
                 key={idx}
-                className={`absolute transition-all duration-500 ease-in-out transform ${getImageClass(
+                className={`absolute transition-all duration-500 ease-in-out transform ${getSlideStyle(
                   idx
                 )} border-2 border-white rounded-xl overflow-hidden`}
                 style={{ width: 100, height: 100 }}
@@ -168,15 +167,11 @@ export default function Predictions({ mesurements, attributes }: any) {
 
       {/* Text Slider */}
       {prediction && (
-        <div
-          className="w-full px-4 bg-[#21212180] p-5 rounded-[2rem]"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
-          <h3 className="text-xl font-bold capitalize mb-2">
+        <div className="w-full px-4 bg-[#21212180] p-5 rounded-[2rem]">
+          <h3 className="text-xl font-bold capitalize mb-2 text-center">
             {clothingKeys[currentSlide]}
           </h3>
-          <p className="text-sm">
+          <p className="text-sm text-center">
             {prediction[getTabKey(activeTab)][clothingKeys[currentSlide]]}
           </p>
         </div>
