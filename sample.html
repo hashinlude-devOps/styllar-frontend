@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hover and Segment Mask</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: sans-serif;
+    }
+    canvas {
+      border: 1px solid black;
+      margin-top: 20px;
+    }
+    #maskDetails {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Hover on Image to View Mask & Contour</h1>
+
+  <!-- File input for the image -->
+  <input type="file" id="imageInput" accept="image/*" />
+  <!-- File input for the gzipped JSON -->
+  <input type="file" id="jsonInput" accept=".json.gz" />
+
+  <canvas id="canvas"></canvas>
+
+  <div id="maskDetails">
+    <h3>Mask Details:</h3>
+    <p><strong>Base64 Mask:</strong> <span id="maskBase64"></span></p>
+    <p><strong>Contour Points:</strong> <span id="contourPoints"></span></p>
+    <p><strong>Mask Index:</strong> <span id="maskIndex"></span></p>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const imageInput = document.getElementById("imageInput");
+    const jsonInput = document.getElementById("jsonInput");
+    const maskBase64Elem = document.getElementById("maskBase64");
+    const contourPointsElem = document.getElementById("contourPoints");
+    const maskIndexElem = document.getElementById("maskIndex");
+
+    let img = new Image();
+    let imageLoaded = false;
+    let masks = [];
+    let contours = [];
+    let maskImages = [];
+    let selectedMaskIndex = -1;
+    let hoveredMaskIndex = -1;
+
+    // Use the "pako" library to decompress gzip
+    const script = document.createElement('script');
+    script.src = "https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js";
+    document.head.appendChild(script);
+
+    // Event listener for the image file input
+    imageInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          img.onload = () => {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            imageLoaded = true;
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Event listener for the gzipped JSON file input
+    jsonInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const arrayBuffer = e.target.result;
+          const decompressedData = pako.inflate(new Uint8Array(arrayBuffer), { to: 'string' });
+          const data = JSON.parse(decompressedData);
+          
+          masks = data.masks_rle;
+          contours = data.contours;
+          
+          // Load mask images
+          masks.forEach((base64, index) => {
+            const maskImg = new Image();
+            maskImg.src = "data:image/png;base64," + base64;
+            maskImages.push(maskImg);
+          });
+        };
+        reader.readAsArrayBuffer(file);
+      }
+    });
+
+    // Hover: Highlight the mask under the cursor and display details
+    canvas.addEventListener("mousemove", (e) => {
+      if (!imageLoaded) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+
+      let highlighted = false;
+
+      contours.forEach((contour, index) => {
+        if (pointInPolygon([x, y], contour.points)) {
+          hoveredMaskIndex = index;
+
+          // Highlight the contour (without modifying the image)
+          ctx.save();
+          ctx.beginPath();
+          const pts = contour.points;
+          ctx.moveTo(pts[0][0], pts[0][1]);
+          for (let i = 1; i < pts.length; i++) {
+            ctx.lineTo(pts[i][0], pts[i][1]);
+          }
+          ctx.closePath();
+          ctx.lineWidth = 2;
+          ctx.strokeStyle = "blue"; // Blue contour color to show hover
+          ctx.stroke();
+
+          // Optionally show mask color overlay (without clipping or filling)
+          ctx.globalAlpha = 0.3;
+          ctx.fillStyle = "blue"; // Translucent blue highlight
+          ctx.fill();
+
+          ctx.restore();
+
+          // Display the mask details on hover
+          maskBase64Elem.textContent = masks[index];
+          contourPointsElem.textContent = JSON.stringify(contour.points);
+          maskIndexElem.textContent = index;
+
+          highlighted = true;
+        }
+      });
+
+      // If no contour was highlighted, just redraw the image
+      if (!highlighted) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+      }
+    });
+
+    // Click: Show info and download segmented area
+    canvas.addEventListener("click", (e) => {
+      if (!imageLoaded) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      contours.forEach((contour, index) => {
+        if (pointInPolygon([x, y], contour.points)) {
+          selectedMaskIndex = index;
+          const points = contour.points;
+
+          // Display mask info
+          maskBase64Elem.textContent = masks[index];
+          contourPointsElem.textContent = JSON.stringify(points);
+          maskIndexElem.textContent = selectedMaskIndex;
+
+          // Create a masked image and download
+          const tempCanvas = document.createElement("canvas");
+          const tempCtx = tempCanvas.getContext("2d");
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = canvas.height;
+
+          tempCtx.beginPath();
+          tempCtx.moveTo(points[0][0], points[0][1]);
+          for (let i = 1; i < points.length; i++) {
+            tempCtx.lineTo(points[i][0], points[i][1]);
+          }
+          tempCtx.closePath();
+          tempCtx.clip();
+
+          tempCtx.drawImage(img, 0, 0);
+
+          tempCanvas.toBlob((blob) => {
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "segmented_part.png";
+            link.click();
+            URL.revokeObjectURL(link.href);
+          }, "image/png");
+        }
+      });
+    });
+
+    function pointInPolygon(point, vs) {
+      let x = point[0], y = point[1];
+      let inside = false;
+      for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+        let xi = vs[i][0], yi = vs[i][1];
+        let xj = vs[j][0], yj = vs[j][1];
+        let intersect = ((yi > y) !== (yj > y)) &&
+                        (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+  </script>
+</body>
+</html>

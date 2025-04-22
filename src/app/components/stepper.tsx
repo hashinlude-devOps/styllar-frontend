@@ -10,13 +10,14 @@ import {
   uploadAttributes,
   uploadMeasurements,
 } from "../../../lib/query/queries";
+import WardrobeUpload from "./stepper_pages/wardrobe_upload";
 
 export default function Stepper() {
   const [step, setStep] = useState(1);
   const [isNextEnabled, setIsNextEnabled] = useState(true);
   const [mesurments, setMesurments] = useState<any>();
 
-  const handleNext = () => setStep((prev) => Math.min(prev + 1, 4));
+  const handleNext = () => setStep((prev) => Math.min(prev + 1, 5));
   const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
 
   const [userDetails, setUserDetails] = useState({
@@ -51,6 +52,12 @@ export default function Stepper() {
     }
   }, [step, capturedImages]);
 
+  useEffect(() => {
+    if (step === 4 && mesurments) {
+      setIsNextEnabled(true);
+    }
+  }, [step, mesurments]);
+
   const renderStepContent = () => {
     switch (step) {
       case 1:
@@ -79,7 +86,10 @@ export default function Stepper() {
           />
         );
       case 4:
-        return <Mesurments key="step1" measurements={mesurments} />;
+        return <Mesurments key="step4" measurements={mesurments} />;
+
+      case 5:
+        return <WardrobeUpload key="step5" />;
 
       default:
         return null;
@@ -132,7 +142,7 @@ export default function Stepper() {
 
         <button
           onClick={handleNext}
-          disabled={!isNextEnabled || step === 4}
+          disabled={!isNextEnabled || step === 5}
           className="rounded-[1rem] py-[1rem] px-[1.5rem] bg-[#2121216b] backdrop-blur-[7.5px] w-full flex items-center justify-center disabled:opacity-50 transition-opacity"
         >
           <ForwardArrow />
