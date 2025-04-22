@@ -43,14 +43,6 @@ export default function UserDetsFormContent({
         }
       />
 
-      <input
-        type="date"
-        placeholder="Date of Birth"
-        value={userDetails.dob}
-        onChange={(e) => handleChange("dob", e.target.value)}
-        className="custom-date-input max-w-[30rem] h-[3.5rem] px-5 py-4 rounded-[1rem] border border-[#8563ED] bg-[rgba(255,255,255,0.05)] text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF] transition"
-      />
-
       {/* Weight */}
       <div className="relative max-w-[30rem]">
         <input

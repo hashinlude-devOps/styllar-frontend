@@ -8,6 +8,7 @@ import Mesurments from "./stepper_pages/mesurments";
 import CameraCapture from "./stepper_pages/camera_capture";
 import {
   fetchMaskData,
+  segmentOutfit,
   uploadAttributes,
   uploadFile,
   uploadMeasurements,
@@ -53,7 +54,6 @@ export default function Stepper() {
   const [userDetails, setUserDetails] = useState({
     name: "",
     email: "",
-    dob: "",
     height: "",
     weight: "",
     gender: "",
@@ -228,7 +228,4 @@ export default function Stepper() {
       </div>
     </div>
   );
-}
-function segmentOutfit(arg0: any): any {
-  throw new Error("Function not implemented.");
 }

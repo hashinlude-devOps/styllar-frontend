@@ -156,6 +156,7 @@ export const segmentOutfit = async (file: string) => {
   return response.data;
 };
 
+
 export const fetchMaskData = async (fileName: string) => {
   const response = await axiosClient({
     method: "GET",
