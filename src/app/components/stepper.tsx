@@ -8,6 +8,7 @@ import Mesurments from "./stepper_pages/mesurments";
 import CameraCapture from "./stepper_pages/camera_capture";
 import {
   uploadAttributes,
+  uploadFile,
   uploadMeasurements,
 } from "../../../lib/query/queries";
 import WardrobeUpload from "./stepper_pages/wardrobe_upload";
@@ -15,7 +16,32 @@ import WardrobeUpload from "./stepper_pages/wardrobe_upload";
 export default function Stepper() {
   const [step, setStep] = useState(1);
   const [isNextEnabled, setIsNextEnabled] = useState(true);
-  const [mesurments, setMesurments] = useState<any>();
+  const [measurements, setMeasurements] = useState<any>([
+    { key: "ankle", value: null, unit: "CM" },
+    { key: "arm_length", value: null, unit: "CM" },
+    { key: "bicep", value: null, unit: "CM" },
+    { key: "calf", value: null, unit: "CM" },
+    { key: "chest", value: null, unit: "CM" },
+    { key: "forearm", value: null, unit: "CM" },
+    { key: "hip", value: null, unit: "CM" },
+    { key: "leg_length", value: null, unit: "CM" },
+    { key: "neck", value: null, unit: "CM" },
+    { key: "shoulder_breadth", value: null, unit: "CM" },
+    { key: "shoulder_to_crotch", value: null, unit: "CM" },
+    { key: "thigh", value: null, unit: "CM" },
+    { key: "waist", value: null, unit: "CM" },
+    { key: "wrist", value: null, unit: "CM" },
+  ]);
+
+  const [attributes, setAttributes] = useState<any>([
+    { key: "age", value: null, unit: "CM" },
+    { key: "gender", value: null, unit: "CM" },
+    { key: "hair_color", value: null, unit: "CM" },
+    { key: "hair_type", value: null, unit: "CM" },
+    { key: "has_facial_hair", value: null, unit: "CM" },
+    { key: "lighting", value: null, unit: "CM" },
+    { key: "skin_tone", value: null, unit: "CM" },
+  ]);
 
   const handleNext = () => setStep((prev) => Math.min(prev + 1, 5));
   const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
@@ -53,10 +79,10 @@ export default function Stepper() {
   }, [step, capturedImages]);
 
   useEffect(() => {
-    if (step === 4 && mesurments) {
+    if (step === 4 && measurements) {
       setIsNextEnabled(true);
     }
-  }, [step, mesurments]);
+  }, [step, measurements]);
 
   const renderStepContent = () => {
     switch (step) {
@@ -86,7 +112,14 @@ export default function Stepper() {
           />
         );
       case 4:
-        return <Mesurments key="step4" measurements={mesurments} />;
+        return (
+          <Mesurments
+            key="step4"
+            measurements={measurements}
+            setMeasurements={setMeasurements}
+            attributes={attributes}
+          />
+        );
 
       case 5:
         return <WardrobeUpload key="step5" />;
@@ -98,9 +131,17 @@ export default function Stepper() {
 
   const callUploadMeasurements = async () => {
     try {
+      const front_image = await uploadFile({
+        image: capturedImages.front!,
+      });
+
+      const sideImage = await uploadFile({
+        image: capturedImages.side!,
+      });
+
       const payload = {
-        frontImage: capturedImages.front!,
-        sideImage: capturedImages.side!,
+        frontImage: front_image?.filename!,
+        sideImage: sideImage?.filename!,
         height: parseFloat(userDetails.height),
         weight: parseFloat(userDetails.weight),
         gender: userDetails.gender as "male" | "female",
@@ -108,12 +149,34 @@ export default function Stepper() {
 
       const [measurementsResponse, attributesResponse] = await Promise.all([
         uploadMeasurements(payload),
-        uploadAttributes(capturedImages.front!),
+        uploadAttributes(front_image?.filename!),
       ]);
 
-      setMesurments((measurementsResponse as any)?.measurements);
+      setMeasurements((prev: any[]) =>
+        prev.map((item) => ({
+          ...item,
+          value: (measurementsResponse as any)?.measurements[item.key] ?? null,
+        }))
+      );
+
+      setAttributes((prev: any[]) =>
+        prev.map((item) => ({
+          ...item,
+          value: (attributesResponse as any)[0].mapped_predictions ?? null,
+        }))
+      );
+
+      setAttributes(
+        (attributesResponse as any)?.predictions.map(
+          ({ bounding_box, mapped_predictions, numeric_predictions }: any) => ({
+            bounding_box,
+            mapped_predictions,
+            numeric_predictions,
+          })
+        )
+      );
     } catch (error) {
-      console.error("❌ Failed to upload data:", error);
+      console.error(error);
     }
   };
 

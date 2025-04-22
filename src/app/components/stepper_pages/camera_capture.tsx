@@ -49,7 +49,6 @@ export default function CameraCapture({
   const captureImage = () => {
     if (!videoRef.current || isProcessing) return;
 
-    console.log("📸 Capturing:", currentCapture);
     setIsProcessing(true);
 
     const canvas = document.createElement("canvas");
@@ -78,7 +77,6 @@ export default function CameraCapture({
         setCapturedSide(true);
         setCapturedImages((prev) => {
           const updated = { ...prev, side: file };
-          console.log("📤 Final Payload before upload:", updated);
           return updated;
         });
 
