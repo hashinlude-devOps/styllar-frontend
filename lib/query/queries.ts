@@ -1,5 +1,6 @@
 // utils/uploadAttributes.ts or directly where you need it
 
+import { MeasurementPayload } from "@/app/types/UserDetails";
 import { axiosClient } from "../src/axios-client";
 
 export const uploadAttributes = async (file: File) => {
@@ -18,13 +19,7 @@ export const uploadAttributes = async (file: File) => {
   return response.data;
 };
 
-export type MeasurementPayload = {
-  frontImage: File;
-  sideImage: File;
-  height: number;
-  weight: number;
-  gender: "male" | "female";
-};
+
   
 export const uploadMeasurements = async ({
     frontImage,

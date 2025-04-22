@@ -17,3 +17,11 @@ export type UserDetails = {
     onGoBack: () => void;
     setCapturedImages: React.Dispatch<React.SetStateAction<{ front: File | null; side: File | null }>>;
   };
+
+  export type MeasurementPayload = {
+    frontImage: File;
+    sideImage: File;
+    height: number;
+    weight: number;
+    gender: "male" | "female";
+  };
