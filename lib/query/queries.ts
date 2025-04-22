@@ -65,3 +65,77 @@ export const uploadFile = async ({ image }: ImagePayload) => {
 
   return response.data as any;
 };
+
+export const getPredictions = async ({
+  height,
+  weight,
+  neck,
+  waist,
+  hip,
+  chest,
+  ankle,
+  arm_length,
+  bicep,
+  calf,
+  forearm,
+  leg_length,
+  shoulder_breadth,
+  shoulder_to_crotch,
+  thigh,
+  gender,
+  has_facial_hair,
+  skin_tone,
+  age_group,
+  hair_color,
+  hair_type,
+  lighting,
+}: any) => {
+  const response = await axiosClient({
+    method: "POST",
+    url: "predict/styling",
+    data: {
+      height,
+      weight,
+      neck,
+      waist,
+      hip,
+      chest,
+      ankle,
+      arm_length,
+      bicep,
+      calf,
+      forearm,
+      leg_length,
+      shoulder_breadth,
+      shoulder_to_crotch,
+      thigh,
+      gender,
+      has_facial_hair,
+      skin_tone,
+      age_group,
+      hair_color,
+      hair_type,
+      lighting,
+    },
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data as any;
+};
+
+export const getPredictionImages = async ({ text }: any) => {
+  const response = await axiosClient({
+    method: "POST",
+    url: "generate-product-images",
+    data: {
+      text,
+    },
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data as any;
+};
