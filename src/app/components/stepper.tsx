@@ -81,10 +81,12 @@ export default function Stepper() {
   }, [step, capturedImages]);
 
   useEffect(() => {
-    if (step === 4 && measurements) {
+    if (step === 4 && measurements && maskData) {
       setIsNextEnabled(true);
+    } else if (step === 4) {
+      setIsNextEnabled(false);
     }
-  }, [step, measurements]);
+  }, [step, measurements, maskData]);
 
   console.log(step, isNextEnabled);
 
