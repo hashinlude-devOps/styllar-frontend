@@ -2,6 +2,7 @@ import Image from "next/image";
 import Avatar from "../../../../public/images/avatar.png";
 import { useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Mesurments({
   measurements,
@@ -20,8 +21,6 @@ export default function Mesurments({
     { key: "skin_tone_9", hex: "#3a312a" },
     { key: "skin_tone_10", hex: "#292420" },
   ]);
-
-  console.log(attributes);
 
   const [selectedSkinToneIndex, setSelectedSkinToneIndex] = useState(1);
 
@@ -59,114 +58,144 @@ export default function Mesurments({
         </div>
       </div>
 
-      <div className="flex mt-[2.3rem]">
+      <div className="flex mt-[2.3rem] h-full">
         {/* Left: Avatar + Scanline */}
-        <div className="w-[50%] h-[350px] relative bg-[url('/radial_gradient_bg.svg')] bg-cover bg-center flex items-center justify-center overflow-hidden group">
+        <motion.div
+          layout
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.6 }}
+          className={`relative bg-[url('/radial_gradient_bg.svg')] bg-cover bg-center flex items-center justify-center overflow-hidden group ${
+            measurements[0].value !== null
+              ? "w-[50%] h-[350px]"
+              : "w-full h-[70vh]"
+          } `}
+        >
           <Image
             alt="Avatar"
             height={100}
             width={150}
             src={Avatar}
-            className="relative z-10"
+            className={`relative z-10 h-full ${
+              measurements[0].value !== null && "w-[80%]"
+            } `}
           />
 
-          <div className="absolute inset-0 z-20 pointer-events-none">
-            <div
-              className="absolute left-0 top-0 w-full h-full animate-scanline"
-              style={{
-                background:
-                  "linear-gradient(to bottom, transparent 0%, rgba(0,255,204,0.12) 45%, rgba(0,255,204,0.15) 55%, transparent 100%)",
-                filter: "blur(8px)",
-                maskImage: `
-                  radial-gradient(farthest-side at 50% 50%, black 60%, transparent 100%)
-                `,
-                WebkitMaskImage: `
-                  radial-gradient(farthest-side at 50% 50%, black 60%, transparent 100%)
-                `,
-              }}
-            />
-          </div>
-        </div>
+          <motion.div
+            initial={{ y: "-100%" }}
+            animate={{ y: "100%" }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+            className="absolute inset-0 z-20 pointer-events-none"
+            style={{
+              background:
+                "linear-gradient(to bottom, transparent 0%, rgba(0,255,204,0.12) 45%, rgba(0,255,204,0.15) 55%, transparent 100%)",
+              filter: "blur(8px)",
+              maskImage:
+                "radial-gradient(farthest-side at 50% 50%, black 60%, transparent 100%)",
+              WebkitMaskImage:
+                "radial-gradient(farthest-side at 50% 50%, black 60%, transparent 100%)",
+            }}
+          />
+        </motion.div>
 
         {/* Right: Measurements & Skin Tone */}
-        <div className="w-[50%] max-h-[38vh] overflow-scroll scrollbar-hide">
-          {measurements && (
-            <div className="flex flex-col gap-[0.5rem]">
-              {measurements?.map((measurement: any, index: any) => (
-                <div
-                  key={index}
-                  className="p-[0.5rem] bg-[#212121CC] rounded-[0.95rem] h-[4rem]"
+        <AnimatePresence>
+          {measurements[0].value !== null && (
+            <motion.div
+              key="measurement-panel"
+              layout
+              initial={{ x: 100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 100, opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="w-[50%] max-h-[38vh] overflow-scroll scrollbar-hide"
+            >
+              <div className="flex flex-col gap-[0.5rem]">
+                {measurements.map((measurement: any, index: any) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="p-[0.5rem] bg-[#212121CC] rounded-[0.95rem] h-[4rem]"
+                  >
+                    <div className="text-white text-[0.634rem] font-bold">
+                      {measurement.key
+                        ?.split("_")
+                        .map(
+                          (word: any) =>
+                            word.charAt(0).toUpperCase() + word.slice(1)
+                        )
+                        .join(" ")}
+                    </div>
+                    <div className="flex justify-between items-center gap-2">
+                      <div className="flex items-baseline gap-1">
+                        <div className="text-[1.5rem] text-[#3AAEF8]">
+                          {Number(measurement?.value).toFixed(2)}
+                        </div>
+                        <div className="text-[0.5rem] text-[#8A8B8F]">
+                          {measurement.unit}
+                        </div>
+                      </div>
+                      <div className="flex gap-[0.5rem]">
+                        <button
+                          onClick={() => updateValue(index, -1)}
+                          className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                        >
+                          –
+                        </button>
+                        <button
+                          onClick={() => updateValue(index, 1)}
+                          className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+
+                {/* Skin Tone Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: measurements.length * 0.05 }}
+                  className="p-[0.5rem] bg-[#212121CC] rounded-[0.95rem] h-[4rem] flex flex-col justify-between"
                 >
                   <div className="text-white text-[0.634rem] font-bold">
-                    {measurement.key
-                      ?.split("_")
-                      .map(
-                        (word: any) =>
-                          word.charAt(0).toUpperCase() + word.slice(1)
-                      )
-                      .join(" ")}
+                    Skin tone
                   </div>
-                  <div className="flex justify-between items-center gap-2">
-                    <div className="flex items-baseline gap-1">
-                      <div className="text-[1.5rem] text-[#3AAEF8]">
-                        {Number((measurement as any)?.value).toFixed(2)}
-                      </div>
-                      <div className="text-[0.5rem] text-[#8A8B8F]">
-                        {measurement.unit}
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <div
+                      style={{
+                        backgroundColor: skinTone[selectedSkinToneIndex].hex,
+                      }}
+                      className="h-6 w-10 rounded-lg"
+                    />
                     <div className="flex gap-[0.5rem]">
                       <button
-                        onClick={() => updateValue(index, -1)}
-                        className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                        onClick={handlePrevSkinTone}
+                        className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white"
                       >
-                        –
+                        <FaChevronLeft />
                       </button>
                       <button
-                        // onClick={() => updateValue(index, 1)}
-                        className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white text-lg"
+                        onClick={handleNextSkinTone}
+                        className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white"
                       >
-                        +
+                        <FaChevronRight />
                       </button>
                     </div>
                   </div>
-                </div>
-              ))}
-
-              {/* Skin Tone Card */}
-              <div className="p-[0.5rem] bg-[#212121CC] rounded-[0.95rem] h-[4rem] flex flex-col justify-between">
-                <div className="text-white text-[0.634rem] font-bold">
-                  Skin tone
-                </div>
-                <div className="flex items-center justify-between">
-                  {/* Skin tone swatch on the left */}
-                  <div
-                    style={{
-                      backgroundColor: skinTone[selectedSkinToneIndex].hex,
-                    }}
-                    className="h-6 w-10 rounded-lg"
-                  />
-
-                  {/* Buttons on the right */}
-                  <div className="flex gap-[0.5rem]">
-                    <button
-                      onClick={handlePrevSkinTone}
-                      className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white"
-                    >
-                      <FaChevronLeft />
-                    </button>
-                    <button
-                      onClick={handleNextSkinTone}
-                      className="bg-[linear-gradient(0deg,rgba(0,0,0,0.14)_0%,rgba(0,0,0,0.14)_100%),linear-gradient(124deg,#9F62ED_-4.44%,#3AAEF8_139.98%)] rounded-full w-[2.135rem] h-[1.5rem] flex items-center justify-center text-white"
-                    >
-                      <FaChevronRight />
-                    </button>
-                  </div>
-                </div>
+                </motion.div>
               </div>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </AnimatePresence>
       </div>
     </>
   );
