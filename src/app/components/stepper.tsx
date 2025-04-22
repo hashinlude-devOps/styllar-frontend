@@ -6,7 +6,10 @@ import UserDetsFormContent from "./stepper_pages/userdets_form";
 import { BackwardArrow, ForwardArrow } from "./svg";
 import Mesurments from "./stepper_pages/mesurments";
 import CameraCapture from "./stepper_pages/camera_capture";
-import { uploadMeasurements } from "../../../lib/query/queries";
+import {
+  uploadAttributes,
+  uploadMeasurements,
+} from "../../../lib/query/queries";
 
 export default function Stepper() {
   const [step, setStep] = useState(1);
@@ -31,9 +34,16 @@ export default function Stepper() {
   }>({ front: null, side: null });
 
   useEffect(() => {
-    if (step === 1) setIsNextEnabled(true);
-    else if (step === 2 || step === 3) setIsNextEnabled(false);
-  }, [step]);
+    if (step === 1) {
+      const isValid =
+        userDetails.height.trim() !== "" &&
+        userDetails.weight.trim() !== "" &&
+        userDetails.gender.trim() !== "";
+      setIsNextEnabled(isValid);
+    } else if (step === 2 || step === 3) {
+      setIsNextEnabled(false);
+    }
+  }, [step, userDetails]);
 
   useEffect(() => {
     if (step === 4 && capturedImages.front && capturedImages.side) {
@@ -86,10 +96,16 @@ export default function Stepper() {
         gender: userDetails.gender as "male" | "female",
       };
 
-      const response = await uploadMeasurements(payload);
-      setMesurments((response as any)?.measurements);
+      // Use Promise.all to call both APIs at the same time
+      const [measurementsResponse, attributesResponse] = await Promise.all([
+        uploadMeasurements(payload), // Upload measurements
+        uploadAttributes(capturedImages.front!), // Upload attributes
+      ]);
+
+      setMesurments((measurementsResponse as any)?.measurements);
+      // optionally store the responses in state or handle them as needed
     } catch (error) {
-      console.log(error);
+      console.error("❌ Failed to upload data:", error);
     }
   };
 
