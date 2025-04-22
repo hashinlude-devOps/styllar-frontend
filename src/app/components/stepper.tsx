@@ -209,7 +209,7 @@ export default function Stepper() {
         </motion.div>
       </AnimatePresence>
 
-      <div className="sticky bottom-10 left-0 right-0 flex justify-center gap-4 z-10 mt-10">
+      <div className="absolute bottom-[2rem] w-full flex justify-center gap-4 z-10 mt-10">
         <button
           onClick={handlePrev}
           disabled={step === 1}
