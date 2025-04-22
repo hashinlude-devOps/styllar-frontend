@@ -8,12 +8,12 @@ import Mesurments from "./stepper_pages/mesurments";
 import CameraCapture from "./stepper_pages/camera_capture";
 import {
   fetchMaskData,
-  segmentOutfit,
   uploadAttributes,
   uploadFile,
   uploadMeasurements,
 } from "../../../lib/query/queries";
 import WardrobeUpload from "./stepper_pages/wardrobe_upload";
+import Predictions from "./stepper_pages/predictions";
 
 export default function Stepper() {
   const [step, setStep] = useState(1);
@@ -38,17 +38,17 @@ export default function Stepper() {
   ]);
 
   const [attributes, setAttributes] = useState<any>([
-    { key: "age", value: null, unit: "CM" },
-    { key: "gender", value: null, unit: "CM" },
-    { key: "hair_color", value: null, unit: "CM" },
-    { key: "hair_type", value: null, unit: "CM" },
-    { key: "has_facial_hair", value: null, unit: "CM" },
-    { key: "lighting", value: null, unit: "CM" },
-    { key: "skin_tone", value: null, unit: "CM" },
+    { key: "age", value: null },
+    { key: "gender", value: null },
+    { key: "hair_color", value: null },
+    { key: "hair_type", value: null },
+    { key: "has_facial_hair", value: null },
+    { key: "lighting", value: null },
+    { key: "skin_tone", value: null },
   ]);
 
-  const handleNext = () => setStep((prev) => Math.min(prev + 1, 5));
-  const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
+  const handleNext = () => setStep((prev) => prev + 1);
+  const handlePrev = () => setStep((prev) => prev - 1);
 
   const [userDetails, setUserDetails] = useState({
     name: "",
@@ -71,8 +71,6 @@ export default function Stepper() {
         userDetails.weight.trim() !== "" &&
         userDetails.gender.trim() !== "";
       setIsNextEnabled(isValid);
-    } else {
-      setIsNextEnabled(false);
     }
   }, [step, userDetails]);
 
@@ -87,6 +85,8 @@ export default function Stepper() {
       setIsNextEnabled(true);
     }
   }, [step, measurements]);
+
+  console.log(step, isNextEnabled);
 
   const renderStepContent = () => {
     switch (step) {
@@ -134,6 +134,8 @@ export default function Stepper() {
           />
         );
 
+      case 6:
+        return <Predictions key="step6" />;
       default:
         return null;
     }
@@ -171,28 +173,21 @@ export default function Stepper() {
         }))
       );
 
+      setAttributes((prev: any[]) =>
+        prev.map((item) => ({
+          ...item,
+          value:
+            (attributesResponse as any)?.predictions[0]?.mapped_predictions?.[
+              item.key
+            ] ?? null,
+        }))
+      );
       const maskFilename = (segmentationResponse as any)?.["filename"] ?? null;
 
       if (maskFilename) {
         const maskData = await fetchMaskData(maskFilename);
         setMaskData(maskData as ArrayBuffer);
       }
-      // setAttributes((prev: any[]) =>
-      //   prev.map((item) => ({
-      //     ...item,
-      //     value: (attributesResponse as any)[0].mapped_predictions ?? null,
-      //   }))
-      // );
-
-      // setAttributes(
-      //   (attributesResponse as any)?.predictions.map(
-      //     ({ bounding_box, mapped_predictions, numeric_predictions }: any) => ({
-      //       bounding_box,
-      //       mapped_predictions,
-      //       numeric_predictions,
-      //     })
-      //   )
-      // );
     } catch (error) {
       console.error(error);
     }
@@ -221,14 +216,19 @@ export default function Stepper() {
           <BackwardArrow />
         </button>
 
-        <button
-          onClick={handleNext}
-          disabled={!isNextEnabled || step === 5}
-          className="rounded-[1rem] py-[1rem] px-[1.5rem] bg-[#2121216b] backdrop-blur-[7.5px] w-full flex items-center justify-center disabled:opacity-50 transition-opacity"
-        >
-          <ForwardArrow />
-        </button>
+        {step !== 6 && (
+          <button
+            onClick={handleNext}
+            disabled={!isNextEnabled}
+            className="rounded-[1rem] py-[1rem] px-[1.5rem] bg-[#2121216b] backdrop-blur-[7.5px] w-full flex items-center justify-center disabled:opacity-50 transition-opacity"
+          >
+            <ForwardArrow />
+          </button>
+        )}
       </div>
     </div>
   );
+}
+function segmentOutfit(arg0: any): any {
+  throw new Error("Function not implemented.");
 }
