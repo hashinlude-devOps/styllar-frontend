@@ -68,7 +68,7 @@ export default function Mesurments({
           className={`relative bg-[url('/radial_gradient_bg.svg')] bg-cover bg-center flex items-center justify-center overflow-hidden group ${
             measurements[0].value !== null
               ? "w-[50%] h-[350px]"
-              : "w-full h-[70vh]"
+              : "w-full h-[50vh]"
           } `}
         >
           <Image
@@ -77,7 +77,7 @@ export default function Mesurments({
             width={150}
             src={Avatar}
             className={`relative z-10 h-full ${
-              measurements[0].value !== null && "w-[80%]"
+              measurements[0].value == null && "w-[60%]"
             } `}
           />
 
