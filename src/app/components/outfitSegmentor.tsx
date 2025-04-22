@@ -19,13 +19,13 @@ export default function OutfitSegmentor({
   const [contours, setContours] = useState<any[]>([]);
   const [masks, setMasks] = useState<string[]>([]);
   const [maskInfo, setMaskInfo] = useState<MaskInfo>(null);
-  
+  const [lockedMask, setLockedMask] = useState<MaskInfo | null>(null);
+
   // Animation parameters
   const glowAmountRef = useRef(0);
   const increasingRef = useRef(true);
 
   useEffect(() => {
-    console.log("image", image);
     if (image) {
       const reader = new FileReader();
       reader.onload = () => {
@@ -48,12 +48,9 @@ export default function OutfitSegmentor({
 
   useEffect(() => {
     if (!maskData) return;
-
     try {
-      const text = new TextDecoder().decode(maskData); // from ArrayBuffer
+      const text = new TextDecoder().decode(maskData);
       const data = JSON.parse(text);
-
-      console.log("Decompressed data:", data);
       setContours(data.contours || []);
       setMasks(data.masks_base64 || []);
     } catch (err) {
@@ -61,10 +58,9 @@ export default function OutfitSegmentor({
     }
   }, [maskData]);
 
-  // Animation effect
   useEffect(() => {
-    // Only start animation if we have an active selection
-    if (!maskInfo || !imgEl || !canvasRef.current) {
+    const active = lockedMask || maskInfo;
+    if (!active || !imgEl || !canvasRef.current) {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
         animationRef.current = null;
@@ -78,24 +74,17 @@ export default function OutfitSegmentor({
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
-      // Clear and redraw base image
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(imgEl, 0, 0);
 
-      // Update glow amount for animation
       if (increasingRef.current) {
         glowAmountRef.current += 0.05;
-        if (glowAmountRef.current >= 1) {
-          increasingRef.current = false;
-        }
+        if (glowAmountRef.current >= 1) increasingRef.current = false;
       } else {
         glowAmountRef.current -= 0.05;
-        if (glowAmountRef.current <= 0.2) {
-          increasingRef.current = true;
-        }
+        if (glowAmountRef.current <= 0.2) increasingRef.current = true;
       }
 
-      // Draw all contours
       contours.forEach((contour, index) => {
         ctx.save();
         ctx.beginPath();
@@ -106,8 +95,7 @@ export default function OutfitSegmentor({
         }
         ctx.closePath();
 
-        if (maskInfo && index === maskInfo.index) {
-          // Active selection with glowing effect
+        if (active && index === active.index) {
           ctx.shadowColor = "rgba(0, 255, 255, 0.8)";
           ctx.shadowBlur = 10 + glowAmountRef.current * 15;
           ctx.lineWidth = 3;
@@ -118,26 +106,21 @@ export default function OutfitSegmentor({
           ctx.fillStyle = "rgba(0, 255, 255, 0.5)";
           ctx.fill();
         }
-        // 🧼 No `else` case — don't stroke non-selected masks
 
         ctx.restore();
       });
 
-      // Continue animation loop
       animationRef.current = requestAnimationFrame(updateCanvas);
     };
 
-    // Start animation loop
     animationRef.current = requestAnimationFrame(updateCanvas);
-
-    // Clean up animation on unmount or when selection changes
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
         animationRef.current = null;
       }
     };
-  }, [maskInfo, imgEl, contours]);
+  }, [maskInfo, lockedMask, imgEl, contours]);
 
   const pointInPolygon = (point: number[], vs: number[][]) => {
     const [x, y] = point;
@@ -153,9 +136,11 @@ export default function OutfitSegmentor({
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!imgEl) return;
+    if (!imgEl || lockedMask) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
+
     const rect = canvas.getBoundingClientRect();
     const displayX = e.clientX - rect.left;
     const displayY = e.clientY - rect.top;
@@ -182,28 +167,57 @@ export default function OutfitSegmentor({
     }
   };
 
-  const handleClick = (e: React.MouseEvent) => {
-    // Optional: Add click functionality to lock selection
-    // This would let users click to keep a segment selected
-    console.log("selected");
+  const handleClick = () => {
+    if (maskInfo && !lockedMask) {
+      setLockedMask(maskInfo);
+    }
+  };
+
+  const getCenter = (points: number[][]) => {
+    const total = points.reduce(
+      (acc, [x, y]) => {
+        acc.x += x;
+        acc.y += y;
+        return acc;
+      },
+      { x: 0, y: 0 }
+    );
+    return {
+      x: total.x / points.length,
+      y: total.y / points.length,
+    };
   };
 
   return (
-    <div className="flex flex-col gap-6 mt-6">
-      <canvas
-        ref={canvasRef}
-        onMouseMove={handleMouseMove}
-        onClick={handleClick}
-        className="border border-white rounded-lg w-full max-w-full cursor-pointer"
-      />
+    <div className="flex flex-col gap-6 mt-6 relative">
+      <div className="relative w-full">
+        <canvas
+          ref={canvasRef}
+          onMouseMove={handleMouseMove}
+          onClick={handleClick}
+          className="border border-white rounded-lg w-full max-w-full cursor-pointer"
+        />
 
-      {/* {maskInfo && (
-        <div className="text-white text-sm bg-[#1a1a1a] p-4 rounded-lg space-y-2">
-          <p>
-            <strong>Segment {maskInfo.index + 1} selected</strong>
-          </p>
-        </div>
-      )} */}
+        {lockedMask && (
+          <div
+            className="absolute z-10"
+            style={{
+              left: `${getCenter(lockedMask.points).x}px`,
+              top: `${getCenter(lockedMask.points).y}px`,
+              transform: "translate(-50%, -50%)",
+            }}
+          >
+            <button
+              className="bg-cyan-500 text-white text-xs px-2 py-1 rounded shadow-md"
+              onClick={() => {
+                alert(`Segment ${lockedMask.index + 1} tagged!`);
+              }}
+            >
+              Tag
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
