@@ -1,7 +1,6 @@
 export type UserDetails = {
   name: string;
   email: string;
-  dob: string;
   weight: string;
   height: string;
   gender: string;
