@@ -11,6 +11,7 @@ import { uploadMeasurements } from "../../../lib/query/queries";
 export default function Stepper() {
   const [step, setStep] = useState(1);
   const [isNextEnabled, setIsNextEnabled] = useState(true);
+  const [mesurments, setMesurments] = useState<any>();
 
   const handleNext = () => setStep((prev) => Math.min(prev + 1, 4));
   const handlePrev = () => setStep((prev) => Math.max(prev - 1, 1));
@@ -29,7 +30,6 @@ export default function Stepper() {
     side: File | null;
   }>({ front: null, side: null });
 
-  // ✅ Only set enable/disable here
   useEffect(() => {
     if (step === 1) setIsNextEnabled(true);
     else if (step === 2 || step === 3) setIsNextEnabled(false);
@@ -69,7 +69,7 @@ export default function Stepper() {
           />
         );
       case 4:
-        return <Mesurments key="step1" />;
+        return <Mesurments key="step1" measurements={mesurments} />;
 
       default:
         return null;
@@ -77,8 +77,6 @@ export default function Stepper() {
   };
 
   const callUploadMeasurements = async () => {
-    console.log("🚀 Payload before upload:", capturedImages);
-
     try {
       const payload = {
         frontImage: capturedImages.front!,
@@ -89,10 +87,9 @@ export default function Stepper() {
       };
 
       const response = await uploadMeasurements(payload);
-      console.log("✅ API Response:", response);
-      // optionally store it in state
+      setMesurments((response as any)?.measurements);
     } catch (error) {
-      console.error("❌ Failed to upload measurements", error);
+      console.log(error);
     }
   };
 
