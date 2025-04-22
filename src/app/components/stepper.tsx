@@ -7,6 +7,8 @@ import { BackwardArrow, ForwardArrow } from "./svg";
 import Mesurments from "./stepper_pages/mesurments";
 import CameraCapture from "./stepper_pages/camera_capture";
 import {
+  fetchMaskData,
+  segmentOutfit,
   uploadAttributes,
   uploadFile,
   uploadMeasurements,
@@ -16,6 +18,8 @@ import WardrobeUpload from "./stepper_pages/wardrobe_upload";
 export default function Stepper() {
   const [step, setStep] = useState(1);
   const [isNextEnabled, setIsNextEnabled] = useState(true);
+  const [maskData, setMaskData] = useState<ArrayBuffer | null>(null);
+
   const [measurements, setMeasurements] = useState<any>([
     { key: "ankle", value: null, unit: "CM" },
     { key: "arm_length", value: null, unit: "CM" },
@@ -122,7 +126,13 @@ export default function Stepper() {
         );
 
       case 5:
-        return <WardrobeUpload key="step5" />;
+        return (
+          <WardrobeUpload
+            key="step5"
+            image={capturedImages.front}
+            maskData={maskData}
+          />
+        );
 
       default:
         return null;
@@ -147,10 +157,12 @@ export default function Stepper() {
         gender: userDetails.gender as "male" | "female",
       };
 
-      const [measurementsResponse, attributesResponse] = await Promise.all([
-        uploadMeasurements(payload),
-        uploadAttributes(front_image?.filename!),
-      ]);
+      const [measurementsResponse, attributesResponse, segmentationResponse] =
+        await Promise.all([
+          uploadMeasurements(payload),
+          uploadAttributes(front_image?.filename!),
+          segmentOutfit(front_image?.filename!),
+        ]);
 
       setMeasurements((prev: any[]) =>
         prev.map((item) => ({
@@ -159,6 +171,12 @@ export default function Stepper() {
         }))
       );
 
+      const maskFilename = (segmentationResponse as any)?.["filename"] ?? null;
+
+      if (maskFilename) {
+        const maskData = await fetchMaskData(maskFilename);
+        setMaskData(maskData as ArrayBuffer);
+      }
       // setAttributes((prev: any[]) =>
       //   prev.map((item) => ({
       //     ...item,
