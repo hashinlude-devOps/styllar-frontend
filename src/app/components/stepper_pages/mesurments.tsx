@@ -21,6 +21,8 @@ export default function Mesurments({
     { key: "skin_tone_10", hex: "#292420" },
   ]);
 
+  console.log(attributes);
+
   const [selectedSkinToneIndex, setSelectedSkinToneIndex] = useState(1);
 
   const handlePrevSkinTone = () => {
