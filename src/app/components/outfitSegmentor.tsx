@@ -1,4 +1,6 @@
+import { div } from "framer-motion/client";
 import { useEffect, useRef, useState } from "react";
+// import Image from "next/image";
 
 type MaskInfo = {
   base64: string;
@@ -20,6 +22,10 @@ export default function OutfitSegmentor({
   const [masks, setMasks] = useState<string[]>([]);
   const [maskInfo, setMaskInfo] = useState<MaskInfo>(null);
   const [lockedMask, setLockedMask] = useState<MaskInfo | null>(null);
+  const [selectedMasks, setSelectedMasks] = useState<Exclude<MaskInfo, null>[]>(
+    []
+  );
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
   // Animation parameters
   const glowAmountRef = useRef(0);
@@ -169,7 +175,46 @@ export default function OutfitSegmentor({
 
   const handleClick = () => {
     if (maskInfo && !lockedMask) {
-      setLockedMask(maskInfo);
+      setLockedMask(maskInfo); // lock the current hover
+    }
+  };
+
+  const handleTag = () => {
+    if (
+      lockedMask &&
+      !selectedMasks.some((mask) => mask.index === lockedMask.index)
+    ) {
+      // Create a canvas to extract the cutout
+      const tempCanvas = document.createElement("canvas");
+      const ctx = tempCanvas.getContext("2d");
+      if (!ctx || !imgEl) return;
+
+      // Set canvas to image size
+      tempCanvas.width = imgEl.width;
+      tempCanvas.height = imgEl.height;
+
+      // Create mask path
+      ctx.save();
+      ctx.beginPath();
+      lockedMask.points.forEach(([x, y], i) => {
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.closePath();
+      ctx.clip();
+
+      // Draw the image within the mask
+      ctx.drawImage(imgEl, 0, 0);
+
+      // Get the base64 image
+      const dataUrl = tempCanvas.toDataURL("image/png");
+
+      setSelectedMasks((prev) => [...prev, lockedMask]);
+      setPreviewUrls((prev) => [...prev, dataUrl]);
+
+      // Reset active mask
+      setLockedMask(null);
+      setMaskInfo(null);
     }
   };
 
@@ -208,16 +253,71 @@ export default function OutfitSegmentor({
             }}
           >
             <button
-              className="bg-cyan-500 text-white text-xs px-2 py-1 rounded shadow-md"
-              onClick={() => {
-                alert(`Segment ${lockedMask.index + 1} tagged!`);
-              }}
+              className="bg-cyan-500 text-white text-xs px-2 py-1 rounded shadow-md whitespace-nowrap"
+              onClick={handleTag}
             >
-              Tag
+              + Add to wardrobe
             </button>
           </div>
         )}
       </div>
+      {selectedMasks.length > 0 && (
+        <div className="flex items-start gap-3 self-stretch">
+          <div className="flex w-20 p-7 flex-col justify-center items-center gap-3 rounded-xl bg-[rgba(33,33,33,0.8)] shadow-[6px_9px_11px_0px_rgba(81,102,241,0.05)]">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              className="w-5 h-5"
+            >
+              <rect
+                width="20"
+                height="20"
+                rx="10"
+                fill="#FEFEFE"
+                fillOpacity="0.1"
+              />
+              <line
+                x1="4"
+                y1="9.80222"
+                x2="16"
+                y2="9.80222"
+                stroke="#9F62ED"
+                strokeWidth="1.8958"
+              />
+              <line
+                x1="10.1979"
+                y1="4"
+                x2="10.1979"
+                y2="16"
+                stroke="#9F62ED"
+                strokeWidth="1.8958"
+              />
+            </svg>
+            <span
+              className="text-[#FEFEFE] text-center text-sm font-medium leading-[1.375rem]"
+              style={{ fontFamily: '"29LT Bukra", sans-serif' }}
+            >
+              Add
+            </span>
+          </div>
+
+          {previewUrls.map((url, index) => (
+            <div
+              key={index}
+              className="w-[7.25rem] h-[6.375rem] flex-shrink-0 border rounded-xl bg-[#D9D9D9] overflow-hidden flex items-center justify-center"
+            >
+              <img
+                src={url}
+                alt={`Outfit ${index}`}
+                className="object-contain"
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
