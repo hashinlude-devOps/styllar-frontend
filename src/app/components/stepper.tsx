@@ -8,6 +8,9 @@ import Mesurments from "./stepper_pages/mesurments";
 import CameraCapture from "./stepper_pages/camera_capture";
 import {
   fetchMaskData,
+  getPredictionImages,
+  getPredictions,
+  removeBg,
   segmentOutfit,
   uploadAttributes,
   uploadFile,
@@ -19,7 +22,17 @@ import Predictions from "./stepper_pages/predictions";
 export default function Stepper() {
   const [step, setStep] = useState(1);
   const [isNextEnabled, setIsNextEnabled] = useState(true);
+  const [bgRemoved, setBgRemoved] = useState<any>(null);
   const [maskData, setMaskData] = useState<ArrayBuffer | null>(null);
+  const [predictions, setPredictions] = useState<any>(null);
+  const [tabImages, setTabImages] = useState<Record<string, (string | null)[]>>(
+    {
+      casual: [null, null, null],
+      office: [null, null, null],
+      party: [null, null, null],
+    }
+  );
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const [measurements, setMeasurements] = useState<any>([
     { key: "ankle", value: null, unit: "CM" },
@@ -63,6 +76,54 @@ export default function Stepper() {
     front: File | null;
     side: File | null;
   }>({ front: null, side: null });
+
+  const tabs = ["Casual", "Office", "Party"];
+  const clothingKeys = ["bottom", "outerwear", "top"];
+
+  const fetchAllPredictionsAndImages = async () => {
+    const measurementObject = measurements?.reduce((acc: any, item: any) => {
+      acc[item.key] = item?.value;
+      return acc;
+    }, {});
+
+    const attributeObject = attributes?.reduce((acc: any, item: any) => {
+      acc[item.key] = item?.value;
+      return acc;
+    }, {});
+
+    const pd = await getPredictions({
+      ...measurementObject,
+      ...attributeObject,
+    });
+
+    const imageMap: Record<string, (string | null)[]> = {
+      casual: [],
+      office: [],
+      party: [],
+    };
+
+    for (const tab of tabs) {
+      const key = tab.toLowerCase();
+      const newImages = await Promise.all(
+        clothingKeys.map(async (k) => {
+          const text = pd.predictions[key][k];
+          try {
+            const result = await getPredictionImages({
+              text: `For ${userDetails.gender} ${text}`,
+            });
+            return result.images[0];
+          } catch {
+            return null;
+          }
+        })
+      );
+      imageMap[key] = newImages;
+    }
+
+    setPredictions(pd.predictions);
+    setTabImages(imageMap);
+    setCurrentSlide(0);
+  };
 
   useEffect(() => {
     if (step === 1) {
@@ -122,6 +183,7 @@ export default function Stepper() {
             measurements={measurements}
             setMeasurements={setMeasurements}
             attributes={attributes}
+            image={bgRemoved}
           />
         );
 
@@ -135,7 +197,15 @@ export default function Stepper() {
         );
 
       case 6:
-        return <Predictions key="step7" />;
+        return (
+          <Predictions
+            key="step7"
+            predictions={predictions}
+            tabImages={tabImages}
+            currentSlide={currentSlide}
+            setCurrentSlide={setCurrentSlide}
+          />
+        );
       default:
         return null;
     }
@@ -150,6 +220,12 @@ export default function Stepper() {
       const sideImage = await uploadFile({
         image: capturedImages.side!,
       });
+
+      const bgRemovedImaage = await removeBg({
+        image: capturedImages.front!,
+      });
+
+      setBgRemoved(bgRemovedImaage?.image);
 
       const payload = {
         frontImage: front_image?.filename!,
@@ -182,12 +258,15 @@ export default function Stepper() {
             ] ?? null,
         }))
       );
+
       const maskFilename = (segmentationResponse as any)?.["filename"] ?? null;
 
       if (maskFilename) {
         const maskData = await fetchMaskData(maskFilename);
         setMaskData(maskData as ArrayBuffer);
       }
+
+      fetchAllPredictionsAndImages();
     } catch (error) {
       console.error(error);
     }

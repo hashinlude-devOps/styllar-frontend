@@ -1,59 +1,20 @@
-import { useEffect, useState, useRef } from "react";
-import {
-  getPredictions,
-  getPredictionImages,
-} from "../../../../lib/query/queries";
+import { useState, useRef } from "react";
+
 import Image from "next/image";
 
 const tabs = ["Casual", "Office", "Party"];
 const clothingKeys = ["bottom", "outerwear", "top"];
 
-export default function Predictions({ mesurements, attributes }: any) {
+export default function Predictions({
+  predictions,
+  tabImages,
+  currentSlide,
+  setCurrentSlide,
+}: any) {
   const [activeTab, setActiveTab] = useState("Casual");
-  const [prediction, setPrediction] = useState<any>(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [images, setImages] = useState<(string | null)[]>([null, null, null]);
 
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
-
-  useEffect(() => {
-    const fetchPredictionsAndImages = async () => {
-      const measurementObject = mesurements?.reduce((acc: any, item: any) => {
-        acc[item.key] = item?.value;
-        return acc;
-      }, {});
-
-      const attributeObject = attributes?.reduce((acc: any, item: any) => {
-        acc[item.key] = item?.value;
-        return acc;
-      }, {});
-
-      const pd = await getPredictions({
-        ...measurementObject,
-        ...attributeObject,
-      });
-
-      setPrediction(pd.predictions);
-
-      const tabKey = getTabKey("Casual");
-      const newImages = await Promise.all(
-        clothingKeys.map(async (key) => {
-          const text = pd.predictions[tabKey][key];
-          try {
-            const result = await getPredictionImages({ text });
-            return result.images[0];
-          } catch {
-            return null;
-          }
-        })
-      );
-      setImages(newImages);
-      setCurrentSlide(0);
-    };
-
-    fetchPredictionsAndImages();
-  }, [mesurements, attributes]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.changedTouches[0].clientX;
@@ -78,25 +39,9 @@ export default function Predictions({ mesurements, attributes }: any) {
     }
   };
 
-  const handleTabChange = async (tab: string) => {
+  const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setCurrentSlide(0);
-
-    const tabKey = getTabKey(tab);
-    if (!prediction) return;
-
-    const newImages = await Promise.all(
-      clothingKeys.map(async (key) => {
-        const text = prediction[tabKey][key];
-        try {
-          const result = await getPredictionImages({ text });
-          return result.images[0];
-        } catch {
-          return null;
-        }
-      })
-    );
-    setImages(newImages);
   };
 
   const getTabKey = (tab: string) => tab.toLowerCase();
@@ -144,7 +89,7 @@ export default function Predictions({ mesurements, attributes }: any) {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {images.map((img, idx) => {
+        {tabImages[getTabKey(activeTab)].map((img: any, idx: any) => {
           if (!img) return null;
 
           const isActive = idx === currentSlide;
@@ -153,11 +98,13 @@ export default function Predictions({ mesurements, attributes }: any) {
             <div
               key={idx}
               className={`absolute transition-all duration-500 ease-in-out transform 
-          ${getSlideStyle(idx)} 
-          ${
-            isActive ? "z-30 opacity-100 scale-110" : "z-10 opacity-40 scale-90"
-          } 
-          overflow-hidden`}
+            ${getSlideStyle(idx)} 
+            ${
+              isActive
+                ? "z-30 opacity-100 scale-110"
+                : "z-10 opacity-40 scale-90"
+            } 
+            overflow-hidden`}
               style={{
                 borderRadius: isActive ? 32 : 16,
               }}
@@ -174,18 +121,13 @@ export default function Predictions({ mesurements, attributes }: any) {
       </div>
 
       {/* Text Slider */}
-      {prediction && (
+      {predictions && (
         <div className="w-full px-4 bg-[#21212180] p-5 rounded-[2rem]">
-          {/* <h3 className="text-xl font-bold capitalize mb-2 text-center">
-            {clothingKeys[currentSlide]}
-          </h3> */}
           <p className="text-sm text-center">
-            {prediction[getTabKey(activeTab)][clothingKeys[currentSlide]]}
+            {predictions[getTabKey(activeTab)][clothingKeys[currentSlide]]}
           </p>
         </div>
       )}
-
-      {/* <div className="mt-10 w-full bg-[#212121CC] rounded-[24px] p-5">A</div> */}
     </div>
   );
 }

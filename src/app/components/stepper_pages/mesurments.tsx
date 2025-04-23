@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Avatar from "../../../../public/images/avatar.png";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -8,7 +8,10 @@ export default function Mesurments({
   measurements,
   attributes,
   setMeasurements,
+  image,
 }: any) {
+  useEffect(() => {}, []);
+
   const [skinTone, setSkinTone] = useState([
     { key: "skin_tone_1", hex: "#f6ede4" },
     { key: "skin_tone_2", hex: "#f3e7db" },
@@ -75,7 +78,12 @@ export default function Mesurments({
             alt="Avatar"
             height={100}
             width={150}
-            src={Avatar}
+            src={
+              Avatar
+              // image != null
+              //   ? `https://demo.styllar.ai/api/files/${image}`
+              //   : Avatar
+            }
             className={`relative z-10 h-full ${
               measurements[0].value == null && "w-[60%]"
             } `}
