@@ -30,3 +30,12 @@ export type MeasurementPayload = {
 export type ImagePayload = {
   image: File;
 };
+
+export type SegmentAnalysis = {
+  description: string;
+  pattern: string;
+  predominant_color: string;
+  secondary_color: string;
+  style: string;
+  type: string;
+};
