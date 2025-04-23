@@ -1,76 +1,20 @@
-import { useEffect, useState, useRef } from "react";
-import {
-  getPredictions,
-  getPredictionImages,
-} from "../../../../lib/query/queries";
+import { useState, useRef } from "react";
+
 import Image from "next/image";
 
 const tabs = ["Casual", "Office", "Party"];
 const clothingKeys = ["bottom", "outerwear", "top"];
 
-export default function Predictions({ mesurements, attributes, gender }: any) {
+export default function Predictions({
+  predictions,
+  tabImages,
+  currentSlide,
+  setCurrentSlide,
+}: any) {
   const [activeTab, setActiveTab] = useState("Casual");
-  const [predictions, setPredictions] = useState<any>(null);
-  const [tabImages, setTabImages] = useState<Record<string, (string | null)[]>>(
-    {
-      casual: [null, null, null],
-      office: [null, null, null],
-      party: [null, null, null],
-    }
-  );
-  const [currentSlide, setCurrentSlide] = useState(0);
 
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
-
-  useEffect(() => {
-    const fetchAllPredictionsAndImages = async () => {
-      const measurementObject = mesurements?.reduce((acc: any, item: any) => {
-        acc[item.key] = item?.value;
-        return acc;
-      }, {});
-
-      const attributeObject = attributes?.reduce((acc: any, item: any) => {
-        acc[item.key] = item?.value;
-        return acc;
-      }, {});
-
-      const pd = await getPredictions({
-        ...measurementObject,
-        ...attributeObject,
-      });
-
-      const imageMap: Record<string, (string | null)[]> = {
-        casual: [],
-        office: [],
-        party: [],
-      };
-
-      for (const tab of tabs) {
-        const key = tab.toLowerCase();
-        const newImages = await Promise.all(
-          clothingKeys.map(async (k) => {
-            const text = pd.predictions[key][k];
-            try {
-              const result = await getPredictionImages({
-                text: `For ${gender} ${text}`,
-              });
-              return result.images[0];
-            } catch {
-              return null;
-            }
-          })
-        );
-        imageMap[key] = newImages;
-      }
-
-      setPredictions(pd.predictions);
-      setTabImages(imageMap);
-      setCurrentSlide(0);
-    };
-
-    fetchAllPredictionsAndImages();
-  }, [mesurements, attributes]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.changedTouches[0].clientX;
@@ -145,7 +89,7 @@ export default function Predictions({ mesurements, attributes, gender }: any) {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {tabImages[getTabKey(activeTab)].map((img, idx) => {
+        {tabImages[getTabKey(activeTab)].map((img: any, idx: any) => {
           if (!img) return null;
 
           const isActive = idx === currentSlide;
