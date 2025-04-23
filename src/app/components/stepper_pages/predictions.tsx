@@ -8,17 +8,23 @@ import Image from "next/image";
 const tabs = ["Casual", "Office", "Party"];
 const clothingKeys = ["bottom", "outerwear", "top"];
 
-export default function Predictions({ mesurements, attributes }: any) {
+export default function Predictions({ mesurements, attributes, gender }: any) {
   const [activeTab, setActiveTab] = useState("Casual");
-  const [prediction, setPrediction] = useState<any>(null);
+  const [predictions, setPredictions] = useState<any>(null);
+  const [tabImages, setTabImages] = useState<Record<string, (string | null)[]>>(
+    {
+      casual: [null, null, null],
+      office: [null, null, null],
+      party: [null, null, null],
+    }
+  );
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [images, setImages] = useState<(string | null)[]>([null, null, null]);
 
   const touchStartX = useRef(0);
   const touchEndX = useRef(0);
 
   useEffect(() => {
-    const fetchPredictionsAndImages = async () => {
+    const fetchAllPredictionsAndImages = async () => {
       const measurementObject = mesurements?.reduce((acc: any, item: any) => {
         acc[item.key] = item?.value;
         return acc;
@@ -34,25 +40,36 @@ export default function Predictions({ mesurements, attributes }: any) {
         ...attributeObject,
       });
 
-      setPrediction(pd.predictions);
+      const imageMap: Record<string, (string | null)[]> = {
+        casual: [],
+        office: [],
+        party: [],
+      };
 
-      const tabKey = getTabKey("Casual");
-      const newImages = await Promise.all(
-        clothingKeys.map(async (key) => {
-          const text = pd.predictions[tabKey][key];
-          try {
-            const result = await getPredictionImages({ text });
-            return result.images[0];
-          } catch {
-            return null;
-          }
-        })
-      );
-      setImages(newImages);
+      for (const tab of tabs) {
+        const key = tab.toLowerCase();
+        const newImages = await Promise.all(
+          clothingKeys.map(async (k) => {
+            const text = pd.predictions[key][k];
+            try {
+              const result = await getPredictionImages({
+                text: `For ${gender} ${text}`,
+              });
+              return result.images[0];
+            } catch {
+              return null;
+            }
+          })
+        );
+        imageMap[key] = newImages;
+      }
+
+      setPredictions(pd.predictions);
+      setTabImages(imageMap);
       setCurrentSlide(0);
     };
 
-    fetchPredictionsAndImages();
+    fetchAllPredictionsAndImages();
   }, [mesurements, attributes]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -78,25 +95,9 @@ export default function Predictions({ mesurements, attributes }: any) {
     }
   };
 
-  const handleTabChange = async (tab: string) => {
+  const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     setCurrentSlide(0);
-
-    const tabKey = getTabKey(tab);
-    if (!prediction) return;
-
-    const newImages = await Promise.all(
-      clothingKeys.map(async (key) => {
-        const text = prediction[tabKey][key];
-        try {
-          const result = await getPredictionImages({ text });
-          return result.images[0];
-        } catch {
-          return null;
-        }
-      })
-    );
-    setImages(newImages);
   };
 
   const getTabKey = (tab: string) => tab.toLowerCase();
@@ -144,7 +145,7 @@ export default function Predictions({ mesurements, attributes }: any) {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {images.map((img, idx) => {
+        {tabImages[getTabKey(activeTab)].map((img, idx) => {
           if (!img) return null;
 
           const isActive = idx === currentSlide;
@@ -153,11 +154,13 @@ export default function Predictions({ mesurements, attributes }: any) {
             <div
               key={idx}
               className={`absolute transition-all duration-500 ease-in-out transform 
-          ${getSlideStyle(idx)} 
-          ${
-            isActive ? "z-30 opacity-100 scale-110" : "z-10 opacity-40 scale-90"
-          } 
-          overflow-hidden`}
+            ${getSlideStyle(idx)} 
+            ${
+              isActive
+                ? "z-30 opacity-100 scale-110"
+                : "z-10 opacity-40 scale-90"
+            } 
+            overflow-hidden`}
               style={{
                 borderRadius: isActive ? 32 : 16,
               }}
@@ -174,18 +177,13 @@ export default function Predictions({ mesurements, attributes }: any) {
       </div>
 
       {/* Text Slider */}
-      {prediction && (
+      {predictions && (
         <div className="w-full px-4 bg-[#21212180] p-5 rounded-[2rem]">
-          {/* <h3 className="text-xl font-bold capitalize mb-2 text-center">
-            {clothingKeys[currentSlide]}
-          </h3> */}
           <p className="text-sm text-center">
-            {prediction[getTabKey(activeTab)][clothingKeys[currentSlide]]}
+            {predictions[getTabKey(activeTab)][clothingKeys[currentSlide]]}
           </p>
         </div>
       )}
-
-      {/* <div className="mt-10 w-full bg-[#212121CC] rounded-[24px] p-5">A</div> */}
     </div>
   );
 }

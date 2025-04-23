@@ -66,6 +66,23 @@ export const uploadFile = async ({ image }: ImagePayload) => {
   return response.data as any;
 };
 
+export const removeBg = async ({ image }: ImagePayload) => {
+  const formData = new FormData();
+
+  formData.append("file", image);
+
+  const response = await axiosClient({
+    method: "POST",
+    url: "remove-background",
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data as any;
+};
+
 export const getPredictions = async ({
   height,
   weight,
@@ -155,7 +172,6 @@ export const segmentOutfit = async (file: string) => {
 
   return response.data;
 };
-
 
 export const fetchMaskData = async (fileName: string) => {
   const response = await axiosClient({

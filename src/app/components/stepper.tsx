@@ -8,6 +8,7 @@ import Mesurments from "./stepper_pages/mesurments";
 import CameraCapture from "./stepper_pages/camera_capture";
 import {
   fetchMaskData,
+  removeBg,
   segmentOutfit,
   uploadAttributes,
   uploadFile,
@@ -19,6 +20,7 @@ import Predictions from "./stepper_pages/predictions";
 export default function Stepper() {
   const [step, setStep] = useState(1);
   const [isNextEnabled, setIsNextEnabled] = useState(true);
+  const [bgRemoved, setBgRemoved] = useState<any>(null);
   const [maskData, setMaskData] = useState<ArrayBuffer | null>(null);
 
   const [measurements, setMeasurements] = useState<any>([
@@ -122,6 +124,7 @@ export default function Stepper() {
             measurements={measurements}
             setMeasurements={setMeasurements}
             attributes={attributes}
+            image={bgRemoved}
           />
         );
 
@@ -135,7 +138,14 @@ export default function Stepper() {
         );
 
       case 6:
-        return <Predictions key="step7" />;
+        return (
+          <Predictions
+            key="step7"
+            gender={userDetails.gender}
+            mesurements={measurements}
+            attributes={attributes}
+          />
+        );
       default:
         return null;
     }
@@ -150,6 +160,12 @@ export default function Stepper() {
       const sideImage = await uploadFile({
         image: capturedImages.side!,
       });
+
+      const bgRemovedImaage = await removeBg({
+        image: capturedImages.front!,
+      });
+
+      setBgRemoved(bgRemovedImaage?.image);
 
       const payload = {
         frontImage: front_image?.filename!,
@@ -182,6 +198,7 @@ export default function Stepper() {
             ] ?? null,
         }))
       );
+
       const maskFilename = (segmentationResponse as any)?.["filename"] ?? null;
 
       if (maskFilename) {
