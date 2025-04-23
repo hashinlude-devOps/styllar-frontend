@@ -166,3 +166,19 @@ export const fetchMaskData = async (fileName: string) => {
 
   return response.data;
 };
+
+export const segmentAnalysis = async (file: string) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await axiosClient({
+    method: "POST",
+    url: "segment/analysis",
+    data: formData,
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response.data;
+};
