@@ -273,7 +273,7 @@ export default function Stepper() {
   };
 
   return (
-    <div className="relative min-h-[85vh]">
+    <div className="relative min-h-screen py-16">
       <AnimatePresence mode="wait">
         <motion.div
           key={step}
@@ -286,7 +286,7 @@ export default function Stepper() {
         </motion.div>
       </AnimatePresence>
 
-      <div className="absolute bottom-[2rem] w-full flex justify-center gap-4 z-10 mt-10">
+      <div className="fixed bottom-0 left-0 right-0 flex justify-center gap-4 z-10 p-4 bg-gradient-to-t from-[#4B3F91] to-transparent">
         <button
           onClick={handlePrev}
           disabled={step === 1}

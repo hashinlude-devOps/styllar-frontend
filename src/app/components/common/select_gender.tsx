@@ -15,11 +15,11 @@ export default function GenderSelect({
         {genders.map((gender) => (
           <label
             key={gender}
-            className={`w-1/2 cursor-pointer flex px-3 py-3 justify-center items-center gap-[0.625rem] rounded-xl shadow-[6px_9px_11px_0px_rgba(81,102,241,0.05)] transition
+            className={`w-1/2 cursor-pointer flex px-3 py-3 justify-center items-center gap-[0.625rem] rounded-xl border border-[#8563ED] shadow-[6px_9px_11px_0px_rgba(81,102,241,0.05)] transition focus:outline-none focus:ring-2 focus:ring-[#8563ED] focus:border-[#B49CFF]
               ${
                 selectedGender === gender
                   ? "bg-[#9F62ED] text-white"
-                  : "bg-[rgba(33,33,33,0.80)] text-white"
+                  : "bg-[rgba(255,255,255,0.05)] text-white"
               }
             `}
           >

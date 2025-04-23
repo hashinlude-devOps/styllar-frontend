@@ -41,3 +41,13 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+.relative.min-h-screen {
+  padding-bottom: 80px; /* Make this match the height of your button area */
+}
+
+.fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}

@@ -120,7 +120,7 @@ export default function Mesurments({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 100, opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="w-[50%] max-h-[38vh] overflow-scroll scrollbar-hide"
+              className="w-[50%]  overflow-scroll scrollbar-hide"
             >
               <div className="flex flex-col gap-[0.5rem]">
                 {measurements.map((measurement: any, index: any) => (
