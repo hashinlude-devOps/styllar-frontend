@@ -79,9 +79,10 @@ export default function Mesurments({
             height={100}
             width={150}
             src={
-              image != null
-                ? `https://demo.styllar.ai/api/files/${image}`
-                : Avatar
+              Avatar
+              // image != null
+              //   ? `https://demo.styllar.ai/api/files/${image}`
+              //   : Avatar
             }
             className={`relative z-10 h-full ${
               measurements[0].value !== null && "w-[80%]"
